@@ -32,6 +32,10 @@ wifi:
 # to provision wifi credentials to the device.
 captive_portal:
 
+external_components:
+  - source: github://jjohnsen/esphome-altherma@main
+    components: [altherma_hub]
+
 uart:
   id: uart_bus
   tx_pin: GPIO17
