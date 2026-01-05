@@ -4,6 +4,10 @@ esphome:
   # Automatically add the mac address to the name
   # so you can use a single firmware for all devices
   name_add_mac_suffix: true
+  # Uncomment below for using mock uart during development:
+  #platformio_options:
+  #  build_flags:
+  #    - -DUSE_MOCK_UART
 
 esp32:
   board: esp32dev
@@ -36,3 +40,11 @@ uart:
   data_bits: 8
   parity: EVEN
   stop_bits: 1
+
+altherma_hub:
+  id: altherma_hub_1
+  uart_id: uart_bus
+  update_interval: 30s
+
+packages:
+  altherma_sensors: github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
