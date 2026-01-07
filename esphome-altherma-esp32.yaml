@@ -32,15 +32,6 @@ wifi:
 # to provision wifi credentials to the device.
 captive_portal:
 
-# external_components:
-#   - source: github://jjohnsen/esphome-altherma@main
-#     components: [altherma_hub]
-
-external_components:
-  - source:
-      type: local
-      path: components
-
 uart:
   id: uart_bus
   tx_pin: GPIO17
@@ -50,10 +41,31 @@ uart:
   parity: EVEN
   stop_bits: 1
 
+external_components:
+# Uncomment below if you want to "Take Control" in ESPHome Device Builder
+#   - source: github://jjohnsen/esphome-altherma@main
+#     components: [altherma_hub]
+# Comment below if you want to "Take Control" in ESPHome Device Builder
+  - source:
+      type: local
+      path: components
+
 altherma_hub:
   id: altherma_hub_1
   uart_id: uart_bus
   update_interval: 30s
 
+# select:
+#   - platform: template
+#     name: "Heat pump Model"
+#     id: heat_pump_model
+#     options:
+#       - "ERGA D EHV-EHB-EHVZ DA series"
+#     initial_option: "ERGA D EHV-EHB-EHVZ DA series"
+#     optimistic: true
+
 packages:
+  # Uncomment below if you want to "Take Control" in ESPHome Device Builder
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
+  # Comment below if you want to "Take Control" in ESPHome Device Builder
   altherma_sensors: !include confs/erga_eh_da_04_08.yaml
