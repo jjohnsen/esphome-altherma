@@ -72,7 +72,7 @@ Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?ta
 
 ## Installation
 
-> **⚠️ Note:** Currently only a sensor mapping for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** exists. Contributions for other models are welcome!
+> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** and the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**. Contributions for other models are welcome!
 
 ### Option 1: Browser Install (ESP Web Tools)
 
@@ -119,6 +119,7 @@ Model files define the available sensors for specific Altherma units. Each senso
 
 **Available models:**
 - `erga_eh_da_04_08.yaml` - ERGA-D EHV/EHB/EHVZ DA series (04-08kW)
+- `erla_d_ebsh_11_16_ech2o.yaml` - EBSXB16P50DF / ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O
 
 **Community-contributed models:**
 - [EHVX configs by @MaBeniu](https://github.com/MaBeniu/esphome-altherma/tree/main/confs)
@@ -166,6 +167,7 @@ esphome-altherma-esp32-s3.yaml     # Board config: ESP32-S3
 esphome-altherma-atoms3.yaml       # Board config: M5Stack AtomS3 Lite
 confs/
   erga_eh_da_04_08.yaml            # Sensor definitions for ERGA-D series
+  erla_d_ebsh_11_16_ech2o.yaml     # Sensor definitions for ERLA D EBSH-X 11-16kW-ECH2O
 components/altherma_hub/
   __init__.py                      # ESPHome component definition (Python)
   altherma_hub.cpp                 # Hub implementation (C++)
