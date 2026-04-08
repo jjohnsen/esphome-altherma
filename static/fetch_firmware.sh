@@ -5,7 +5,7 @@ OWNER="jjohnsen"
 REPO="esphome-altherma"
 OUT_DIR="firmware"
 
-mkdir -p "$OUT_DIR"
+mkdir -p "_site/$OUT_DIR"
 
 curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/latest" \
 | ruby -r json -e '
