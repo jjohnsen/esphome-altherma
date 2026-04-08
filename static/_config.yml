@@ -1,3 +1,8 @@
 title: ESPHome Altherma
 description: Monitor your Daikin Altherma heat pump from Home Assistant using ESPHome
 theme: jekyll-theme-slate
+github:
+  is_project_page: true
+  repository_url: https://github.com/jjohnsen/esphome-altherma
+  owner_url: https://github.com/jjohnsen
+  owner_name: jjohnsen

@@ -1,3 +1,7 @@
+---
+layout: default
+title: ESPHome Altherma
+---
 An [ESPHome](https://esphome.io/) custom component for monitoring [Daikin Altherma](https://www.daikin.eu/) heat pumps via the X10A connector. Exposes temperatures, voltages, currents, and diagnostics directly to [Home Assistant](https://www.home-assistant.io/).
 
 For hardware requirements, wiring diagrams, and full documentation, see the <a href="https://github.com/jjohnsen/esphome-altherma">GitHub repository</a>.
