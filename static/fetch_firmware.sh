@@ -3,7 +3,7 @@ set -euo pipefail
 
 OWNER="jjohnsen"
 REPO="esphome-altherma"
-OUT_DIR="../public/firmware"
+OUT_DIR="firmware"
 
 mkdir -p "$OUT_DIR"
 
