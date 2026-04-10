@@ -6,3 +6,6 @@ github:
   repository_url: https://github.com/jjohnsen/esphome-altherma
   owner_url: https://github.com/jjohnsen
   owner_name: jjohnsen
+
+include:
+  - functions
