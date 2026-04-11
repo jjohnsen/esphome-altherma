@@ -9,3 +9,10 @@ github:
 
 include:
   - functions
+
+exclude:
+  - "*.sh"
+  - "**/*.sh"
+
+keep_files:
+  - firmware
