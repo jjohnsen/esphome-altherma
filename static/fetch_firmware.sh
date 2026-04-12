@@ -7,7 +7,8 @@ OUT_DIR="_site/firmware"
 
 mkdir -p "$OUT_DIR"
 
-curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/latest" \
+#curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/latest" \
+curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/tags/v1.0.4" \
 | ruby -r json -e '
 data = JSON.parse(STDIN.read)
 data["assets"].each do |a|
