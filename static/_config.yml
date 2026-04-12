@@ -12,7 +12,6 @@ include:
 
 exclude:
   - "*.sh"
-  - "**/*.sh"
 
 keep_files:
   - firmware
