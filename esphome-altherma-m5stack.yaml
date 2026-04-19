@@ -1,0 +1,281 @@
+packages:
+  base: !include base.yaml
+
+esphome:
+  name: esphome-altherma-m5stack
+  friendly_name: ESPHome Altherma
+  name_add_mac_suffix: false
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# OTA is required for Over-the-Air updating
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+esp32:
+  board: m5stack-core-esp32
+  framework:
+    type: esp-idf
+
+# To be able to get logs from the device via serial and api.
+logger:
+  level: DEBUG # Set to INFO on production
+
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_s
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    id: wifi_signal_sensor
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: ip_addr
+    ssid:
+      name: "SSID"
+      id: ssid_name
+
+globals:
+  - id: ui_selected_index
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: ui_detail_mode
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+# Backlight control
+output:
+  - platform: ledc
+    pin: GPIO32
+    id: backlight_output
+
+light:
+  - platform: monochromatic
+    output: backlight_output
+    name: "Display Backlight"
+    id: backlight
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0.5s
+
+# Backlight timeout and UI navigation scripts
+script:
+  - id: backlight_timer
+    mode: restart
+    then:
+      - light.turn_on:
+          id: backlight
+          brightness: 100%
+      - delay: 20s
+      - light.turn_on:
+          id: backlight
+          brightness: 30%
+      - delay: 300s
+      - light.turn_off: backlight
+
+  - id: ui_prev
+    then:
+      - lambda: |-
+          int item_count = 0;
+          for (auto *s : App.get_sensors())        { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) item_count++; }
+          if (item_count <= 0) { id(ui_selected_index) = 0; return; }
+          id(ui_selected_index) = (id(ui_selected_index) - 1 + item_count) % item_count;
+      - component.update: m5_display
+
+  - id: ui_next
+    then:
+      - lambda: |-
+          int item_count = 0;
+          for (auto *s : App.get_sensors())        { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) item_count++; }
+          if (item_count <= 0) { id(ui_selected_index) = 0; return; }
+          id(ui_selected_index) = (id(ui_selected_index) + 1) % item_count;
+      - component.update: m5_display
+
+  - id: ui_toggle_detail
+    then:
+      - lambda: |-
+          id(ui_detail_mode) = !id(ui_detail_mode);
+      - component.update: m5_display
+
+# M5Stack buttons
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO39
+      inverted: true
+    name: "M5 Button A"
+    id: button_a
+    on_press:
+      - script.execute: backlight_timer
+      - script.execute: ui_prev
+
+  - platform: gpio
+    pin:
+      number: GPIO38
+      inverted: true
+    name: "M5 Button B"
+    id: button_b
+    on_press:
+      - script.execute: backlight_timer
+      - script.execute: ui_next      
+
+  - platform: gpio
+    pin:
+      number: GPIO37
+      inverted: true
+    name: "M5 Button C"
+    id: button_c
+    on_press:
+      - script.execute: backlight_timer
+      - script.execute: ui_toggle_detail
+
+  - platform: template
+    name: "Altherma Update Running"
+    id: altherma_updating
+    internal: true
+
+font:
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 16
+    extras:
+      - file: "gfonts://Roboto"
+        glyphs: ["⁄"]
+  - file: "gfonts://Roboto"
+    id: font_large
+    size: 28
+    extras:
+      - file: "gfonts://Roboto"
+        glyphs: ["⁄"]
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO23
+  miso_pin: GPIO19
+
+# Keep available for optional graphing
+color:
+  - id: my_green
+    hex: 00FF00
+
+graph:
+  - id: wifi_graph
+    duration: 300min
+    width: 300
+    height: 120
+    border: true
+    traces:
+      - sensor: wifi_signal_sensor
+        line_thickness: 3
+        color: my_green
+
+display:
+  - platform: mipi_spi
+    id: m5_display
+    model: M5CORE
+    rotation: 0
+    lambda: |-
+      // Build unified sorted list: type 0=sensor, 1=text_sensor, 2=binary_sensor
+      struct Entry { void *ptr; uint8_t type; };
+      std::vector<Entry> items;
+      items.reserve(64);
+      for (auto *s : App.get_sensors())        { if (!s->is_internal()) items.push_back({s, 0}); }
+      for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) items.push_back({s, 1}); }
+      for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) items.push_back({s, 2}); }
+
+      auto entry_name = [](const Entry &e) -> const char * {
+        if (e.type == 0) return static_cast<sensor::Sensor *>(e.ptr)->get_name().c_str();
+        if (e.type == 1) return static_cast<text_sensor::TextSensor *>(e.ptr)->get_name().c_str();
+        return static_cast<binary_sensor::BinarySensor *>(e.ptr)->get_name().c_str();
+      };
+      std::sort(items.begin(), items.end(), [&entry_name](const Entry &a, const Entry &b) {
+        return strcmp(entry_name(a), entry_name(b)) < 0;
+      });
+
+      const int item_count = static_cast<int>(items.size());
+
+      if (item_count <= 0) {
+        it.filled_rectangle(0, 0, 320, 28, Color(0x21, 0x96, 0xF3));
+        it.printf(8, 6, id(font_small), Color::WHITE, "Sensor List");
+        it.printf(8, 44, id(font_small), Color::WHITE, "No sensors found");
+        return;
+      }
+
+      const int selected = (id(ui_selected_index) % item_count + item_count) % item_count;
+      const int first_visible = (selected / 6) * 6;
+
+      it.filled_rectangle(0, 0, 320, 28, Color(0x21, 0x96, 0xF3));
+      it.printf(8, 6, id(font_small), Color::WHITE, "%s", App.get_name().c_str());
+
+      auto render_row = [&](const Entry &e, int y, bool active) {
+        const Color fg = active ? Color(0xFF, 0xEB, 0x3B) : Color::WHITE;
+        const char *pfx = active ? ">" : " ";
+        const char *name = entry_name(e);
+        if (e.type == 0) {
+          auto *s = static_cast<sensor::Sensor *>(e.ptr);
+          const int dec = s->get_accuracy_decimals() >= 0 ? s->get_accuracy_decimals() : 1;
+          const auto uref = s->get_unit_of_measurement_ref();
+          const char *unit = uref.empty() ? "" : uref.c_str();
+          if (s->has_state())
+            it.printf(6, y, id(font_small), fg, "%s %s: %.*f %s", pfx, name, dec, s->state, unit);
+          else
+            it.printf(6, y, id(font_small), fg, "%s %s: --", pfx, name);
+        } else if (e.type == 1) {
+          auto *s = static_cast<text_sensor::TextSensor *>(e.ptr);
+          if (s->has_state())
+            it.printf(6, y, id(font_small), fg, "%s %s: %s", pfx, name, s->state.c_str());
+          else
+            it.printf(6, y, id(font_small), fg, "%s %s: --", pfx, name);
+        } else {
+          auto *s = static_cast<binary_sensor::BinarySensor *>(e.ptr);
+          if (s->has_state())
+            it.printf(6, y, id(font_small), fg, "%s %s: %s", pfx, name, s->state ? "ON" : "OFF");
+          else
+            it.printf(6, y, id(font_small), fg, "%s %s: --", pfx, name);
+        }
+      };
+
+      if (!id(ui_detail_mode)) {
+        int line_y = 36;
+        for (int i = first_visible; i < std::min(first_visible + 6, item_count); i++) {
+          render_row(items[i], line_y, i == selected);
+          line_y += 32;
+        }
+      } else {
+        const Entry &e = items[selected];
+        const char *name = entry_name(e);
+        it.printf(10, 40, id(font_small), Color(0xA5, 0xD6, 0xA7), "Selected sensor:");
+        it.printf(10, 66, id(font_small), "%s", name);
+        if (e.type == 0) {
+          auto *s = static_cast<sensor::Sensor *>(e.ptr);
+          const int dec = s->get_accuracy_decimals() >= 0 ? s->get_accuracy_decimals() : 1;
+          const auto uref = s->get_unit_of_measurement_ref();
+          const char *unit = uref.empty() ? "" : uref.c_str();
+          if (s->has_state()) {
+            it.printf(10, 108, id(font_large), "%.*f", dec, s->state);
+            it.printf(10, 150, id(font_small), "%s", unit);
+          } else {
+            it.printf(10, 108, id(font_large), "--");
+          }
+        } else if (e.type == 1) {
+          auto *s = static_cast<text_sensor::TextSensor *>(e.ptr);
+          it.printf(10, 108, id(font_small), "%s", s->has_state() ? s->state.c_str() : "--");
+        } else {
+          auto *s = static_cast<binary_sensor::BinarySensor *>(e.ptr);
+          it.printf(10, 108, id(font_large), "%s", s->has_state() ? (s->state ? "ON" : "OFF") : "--");
+        }
+        it.printf(10, 206, id(font_small), Color(0xCF, 0xD8, 0xDC), "C = back to list");
+      }
