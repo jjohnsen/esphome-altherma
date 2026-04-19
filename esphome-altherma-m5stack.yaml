@@ -153,7 +153,7 @@ font:
     size: 16
     extras:
       - file: "gfonts://Roboto"
-        glyphs: ["⁄"]
+        glyphs: ["⁄", "●"]
   - file: "gfonts://Roboto"
     id: font_large
     size: 28
@@ -188,6 +188,30 @@ display:
     model: M5CORE
     rotation: 0
     lambda: |-
+      // Header bar with WiFi signal indicator
+      it.filled_rectangle(0, 0, 320, 28, Color(0x40, 0x40, 0x40));
+      it.printf(8, 6, id(font_small), Color::WHITE, "%s", App.get_name().c_str());
+      
+      // WiFi signal indicator (upper right)
+      if (id(wifi_signal_sensor).has_state()) {
+        int rssi = (int)id(wifi_signal_sensor).state;
+        const char *wifi_label = "WiFi";
+        Color wifi_color = Color::WHITE;
+        if (rssi > -60) {
+          wifi_label = "WiFi●●●";
+          wifi_color = Color(0x4C, 0xAF, 0x50);  // green
+        } else if (rssi > -80) {
+          wifi_label = "WiFi● ●";
+          wifi_color = Color(0xFF, 0x9C, 0x00);  // orange
+        } else {
+          wifi_label = "WiFi●";
+          wifi_color = Color(0xF4, 0x43, 0x36);  // red
+        }
+        it.printf(216, 6, id(font_small), wifi_color, "%s", wifi_label);
+      } else {
+        it.printf(236, 6, id(font_small), Color::WHITE, "WiFi?");
+      }
+
       // Build unified sorted list: type 0=sensor, 1=text_sensor, 2=binary_sensor
       struct Entry { void *ptr; uint8_t type; };
       std::vector<Entry> items;
@@ -208,17 +232,11 @@ display:
       const int item_count = static_cast<int>(items.size());
 
       if (item_count <= 0) {
-        it.filled_rectangle(0, 0, 320, 28, Color(0x21, 0x96, 0xF3));
-        it.printf(8, 6, id(font_small), Color::WHITE, "Sensor List");
-        it.printf(8, 44, id(font_small), Color::WHITE, "No sensors found");
         return;
       }
 
       const int selected = (id(ui_selected_index) % item_count + item_count) % item_count;
       const int first_visible = (selected / 6) * 6;
-
-      it.filled_rectangle(0, 0, 320, 28, Color(0x21, 0x96, 0xF3));
-      it.printf(8, 6, id(font_small), Color::WHITE, "%s", App.get_name().c_str());
 
       auto render_row = [&](const Entry &e, int y, bool active) {
         const Color fg = active ? Color(0xFF, 0xEB, 0x3B) : Color::WHITE;
@@ -259,6 +277,7 @@ display:
         const char *name = entry_name(e);
         it.printf(10, 40, id(font_small), Color(0xA5, 0xD6, 0xA7), "Selected sensor:");
         it.printf(10, 66, id(font_small), "%s", name);
+        
         if (e.type == 0) {
           auto *s = static_cast<sensor::Sensor *>(e.ptr);
           const int dec = s->get_accuracy_decimals() >= 0 ? s->get_accuracy_decimals() : 1;
