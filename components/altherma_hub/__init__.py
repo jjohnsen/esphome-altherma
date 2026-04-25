@@ -5,7 +5,7 @@ from esphome.components import uart
 import os
 from pathlib import Path
 
-DEPENDENCIES = ["uart"]
+DEPENDENCIES = ["uart", "api"]
 AUTO_LOAD = ["sensor", "text_sensor", "binary_sensor"]
 MULTI_CONF = True
 

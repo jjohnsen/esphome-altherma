@@ -39,6 +39,9 @@ void AlthermaHub::register_sensor(AlthermaSensorBase *sensor) {
 void AlthermaHub::setup() {
   ESP_LOGI(TAG, "Altherma hub setup");
   this->converter_ = new Converter();
+  
+  this->register_service(&AlthermaHub::queue_manual_query, "query_register",
+                         {"register", "offset", "convid", "datasize"});  
 }
 
 AlthermaHub::~AlthermaHub() {
@@ -62,13 +65,25 @@ void AlthermaHub::update() {
 }
 
 void AlthermaHub::loop() {
-  if (!this->poll_active_) {
+  if (!this->poll_active_ && !this->manual_query_pending_) {
     return;
+  }
+
+  if (!this->poll_active_ && this->manual_query_pending_) {
+    this->poll_active_ = true;
+    this->manual_query_active_ = true;
+    this->query_state_ = QueryState::SEND_QUERY;
+    this->cycle_started_at_ = millis();
   }
 
   switch (this->query_state_) {
     case QueryState::SEND_QUERY:
-      this->start_query_(this->registers_[this->register_index_]);
+      if (this->manual_query_active_) {
+        this->manual_query_pending_ = false;
+        this->start_query_(this->manual_register_);
+      } else {
+        this->start_query_(this->registers_[this->register_index_]);
+      }
       break;
     case QueryState::READ_RESPONSE:
       this->read_response_();
@@ -76,6 +91,38 @@ void AlthermaHub::loop() {
     case QueryState::IDLE:
     default:
       break;
+  }
+}
+
+void AlthermaHub::queue_manual_query(std::string registry_id, int32_t offset, int32_t convid, int32_t datasize) {
+  char *end = nullptr;
+  errno = 0;
+  
+  long value = std::strtol(registry_id.c_str(), &end, 0);  // base 0: auto-detect 0x, decimal, octal
+  if (end == registry_id.c_str() || *end != '\0' || errno != 0) {
+    ESP_LOGE(TAG, "Manual query rejected: invalid register: %s", registry_id.c_str());
+    return;
+  }
+
+  if (value < 0 || value > 0xFF) {
+    ESP_LOGE(TAG, "Manual query rejected: register out of range: %ld", value);
+    return;
+  }
+
+  this->manual_register_ = static_cast<uint8_t>(value);
+  this->manual_offset_ = offset;
+  this->manual_convid_ = convid;
+  this->manual_datasize_ = datasize;
+  this->manual_query_pending_ = true;
+
+  ESP_LOGI(TAG, "Manual query accepted reg=0x%02lX offset=%d convid=%d datasize=%d",
+           value, offset, convid, datasize);
+
+  if (!this->poll_active_) {
+    this->poll_active_ = true;
+    this->manual_query_active_ = true;
+    this->query_state_ = QueryState::SEND_QUERY;
+    this->cycle_started_at_ = millis();
   }
 }
 
@@ -204,14 +251,33 @@ void AlthermaHub::handle_complete_frame_() {
     return;
   }
 
-  LabelDef label;
-  for (auto *sensor : this->sensors_) {
-    if (sensor->registry_id() != this->current_register_) {
-      continue;
-    }
+    if (this->manual_query_active_) {
+    LabelDef label(
+      this->manual_register_,
+      this->manual_offset_,
+      this->manual_convid_,
+      this->manual_datasize_,
+      1,
+      "manual_query"
+    );
 
-    if (this->decode_label(sensor, this->rx_buffer_, this->rx_len_, label)) {
-      sensor->publish_state(label.asString);
+    unsigned char *input = this->rx_buffer_ + static_cast<size_t>(this->manual_offset_) + 3;
+    this->converter_->convert(&label, input);
+
+    ESP_LOGI(TAG, "Manual query result reg=0x%02X value=%s",
+             this->manual_register_, label.asString);
+
+    this->manual_query_active_ = false;
+  } else {
+    LabelDef label;
+    for (auto *sensor : this->sensors_) {
+      if (sensor->registry_id() != this->current_register_) {
+        continue;
+      }
+
+      if (this->decode_label(sensor, this->rx_buffer_, this->rx_len_, label)) {
+        sensor->publish_state(label.asString);
+      }
     }
   }
 
@@ -222,6 +288,13 @@ void AlthermaHub::handle_complete_frame_() {
 }
 
 void AlthermaHub::advance_register_() {
+  if (this->manual_query_active_ || !this->registers_.size()) {
+    this->manual_query_active_ = false;
+    this->poll_active_ = false;
+    this->query_state_ = QueryState::IDLE;
+    return;
+  }
+    
   this->register_index_++;
   if (this->register_index_ >= this->registers_.size()) {
     this->poll_active_ = false;
