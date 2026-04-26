@@ -11,8 +11,13 @@ mkdir -p "$OUT_DIR"
 curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/latest" \
 | ruby -r json -e '
 data = JSON.parse(STDIN.read)
-data["assets"].each do |a|
-  puts "#{a["browser_download_url"]}|#{a["name"]}"
+if data.is_a?(Hash) && data["assets"].is_a?(Array)
+  data["assets"].each do |a|
+    puts "#{a["browser_download_url"]}|#{a["name"]}"
+  end
+else
+  STDERR.puts "Error: Failed to fetch releases or no assets found. Response: #{data.inspect}"
+  exit 1
 end
 ' \
 | while IFS='|' read -r url name; do
