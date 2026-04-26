@@ -1,5 +1,5 @@
 title: ESPHome Altherma
-description: Monitor your Daikin Altherma heat pump from Home Assistant using ESPHome
+description: Monitor your Daikin heat pump from Home Assistant using ESPHome
 theme: jekyll-theme-slate
 github:
   is_project_page: true
