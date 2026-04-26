@@ -7,7 +7,7 @@ Built for supported ESP32 boards, ESPHome Altherma monitors Daikin Altherma heat
 
 ![m5stack Basic running ESPHome Altherma](/assets/images/esphome-altherma-m5stack.jpg)
 
-For hardware requirements, wiring, and advanced configuration, see the <a href="https://github.com/jjohnsen/esphome-altherma">full project documentation</a>.
+For hardware requirements, wiring, and advanced configuration, see the <a href="https://github.com/jjohnsen/esphome-altherma">full project docs</a>.
 
 ## Install
 
