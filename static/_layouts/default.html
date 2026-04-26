@@ -15,6 +15,40 @@
     </script>
 {% seo %}
     {% include head-custom.html %}
+    <style>
+      #header_wrap .inner {
+        padding-bottom: 0px;
+      }
+
+      #main_content {
+        padding-top: 10px;
+      }
+
+      #main_content img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      #header_back_link {
+        position: absolute;
+        top: 0;
+        left: 10px;
+        z-index: 10;
+        margin: 0;
+      }
+
+      #header_back_link a {
+        display: block;
+        padding: 10px;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      #header_back_link a:hover {
+        text-decoration: underline;
+      }
+    </style>
 
   </head>
 
@@ -23,11 +57,15 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
+          <p id="header_back_link">
+            <a href="https://jjohnsen.no">← jjohnsen.no</a>
+          </p>          
           {% if site.github.is_project_page %}
             <a id="forkme_banner" href="{{ site.github.repository_url }}">View on GitHub</a>
           {% endif %}
 
           <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
+
           <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
 
           {% if site.show_downloads %}
