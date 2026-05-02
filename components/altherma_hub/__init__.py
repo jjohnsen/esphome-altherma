@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
-from esphome.components import uart
+from esphome.components import uart, text_sensor
 import os
 from pathlib import Path
 
@@ -20,6 +20,7 @@ CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(AlthermaHub),
+            cv.Optional("query_result_text_sensor"): cv.use_id(text_sensor.TextSensor),
         }
     )
     .extend(cv.polling_component_schema("30s"))
@@ -31,6 +32,10 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+
+    if "query_result_text_sensor" in config:
+        query_sensor = await cg.get_variable(config["query_result_text_sensor"])
+        cg.add(var.set_query_result_text_sensor(query_sensor))
 
     # Get the absolute path to the lib directory
     lib_path = Path(__file__).parent / "lib"
