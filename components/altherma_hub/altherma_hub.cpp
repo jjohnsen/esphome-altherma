@@ -50,25 +50,14 @@ AlthermaHub::~AlthermaHub() {
   delete this->converter_;
 }
 
-void AlthermaHub::publish_manual_query_statusf_(ManualQueryStatusLevel level, const char *fmt, ...) {
+void AlthermaHub::publish_manual_query_statusf_(esp_log_level_t level, const char *fmt, ...) {
   char message[384];
   va_list args;
   va_start(args, fmt);
   vsnprintf(message, sizeof(message), fmt, args);
   va_end(args);
 
-  switch (level) {
-    case ManualQueryStatusLevel::ERROR:
-      ESP_LOGE(TAG, "%s", message);
-      break;
-    case ManualQueryStatusLevel::WARN:
-      ESP_LOGW(TAG, "%s", message);
-      break;
-    case ManualQueryStatusLevel::INFO:
-    default:
-      ESP_LOGI(TAG, "%s", message);
-      break;
-  }
+  esp_log_write(level, TAG, "%s", message);
 
   if (this->query_result_text_sensor_ != nullptr) {
     this->query_result_text_sensor_->publish_state(message);
@@ -123,7 +112,7 @@ void AlthermaHub::loop() {
 
 void AlthermaHub::queue_manual_query(std::string registry_id, int32_t offset, int32_t convid, int32_t datasize) {
   if (this->manual_query_active_ || this->manual_query_pending_) {
-    this->publish_manual_query_statusf_(ManualQueryStatusLevel::WARN,
+    this->publish_manual_query_statusf_(ESP_LOG_WARN,
                                         "Manual query rejected: previous manual query still in progress");
     return;
   }
@@ -133,19 +122,19 @@ void AlthermaHub::queue_manual_query(std::string registry_id, int32_t offset, in
   
   long value = std::strtol(registry_id.c_str(), &end, 0);  // base 0: auto-detect 0x, decimal, octal
   if (end == registry_id.c_str() || *end != '\0' || errno != 0) {
-    this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+    this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                         "Manual query rejected: invalid register: %s", registry_id.c_str());
     return;
   }
 
   if (value < 0 || value > 0xFF) {
-    this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+    this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                         "Manual query rejected: register out of range: %ld", value);
     return;
   }
 
   if (offset < 0 || datasize <= 0) {
-    this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+    this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                         "Manual query rejected: invalid bounds offset=%d datasize=%d", offset, datasize);
     return;
   }
@@ -156,7 +145,7 @@ void AlthermaHub::queue_manual_query(std::string registry_id, int32_t offset, in
   this->manual_datasize_ = datasize;
   this->manual_query_pending_ = true;
 
-  this->publish_manual_query_statusf_(ManualQueryStatusLevel::INFO,
+  this->publish_manual_query_statusf_(ESP_LOG_INFO,
                                       "Manual query accepted reg=0x%02lX offset=%d convid=%d datasize=%d",
                                       value, offset, convid, datasize);
 
@@ -243,7 +232,7 @@ void AlthermaHub::read_response_() {
 
   if (millis() - this->query_started_at_ > QUERY_TIMEOUT_MS) {
     if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+      this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                           "Manual query failed reg=0x%02X: timeout waiting for response",
                                           this->current_register_);
     } else {
@@ -275,7 +264,7 @@ void AlthermaHub::read_response_() {
     this->expected_total_ = static_cast<size_t>(this->rx_buffer_[2]) + 2;
     if (this->expected_total_ > RX_BUFFER_SIZE) {
       if (this->manual_query_active_) {
-        this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+        this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                             "Manual query failed reg=0x%02X: invalid frame length 0x%02X",
                                             this->current_register_, this->rx_buffer_[2]);
       } else {
@@ -295,7 +284,7 @@ void AlthermaHub::handle_complete_frame_() {
   unsigned char crc = calculate_crc(this->rx_buffer_, this->rx_len_ - 1);
   if (crc != this->rx_buffer_[this->rx_len_ - 1]) {
     if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+      this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                           "Manual query failed reg=0x%02X: CRC invalid 0x%02X (expected 0x%02X)",
                                           this->current_register_, this->rx_buffer_[this->rx_len_ - 1], crc);
     } else {
@@ -307,7 +296,7 @@ void AlthermaHub::handle_complete_frame_() {
 
   if (this->rx_buffer_[1] != this->current_register_) {
     if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ManualQueryStatusLevel::ERROR,
+      this->publish_manual_query_statusf_(ESP_LOG_ERROR,
                                           "Manual query failed reg=0x%02X: response for 0x%02X",
                                           this->current_register_, this->rx_buffer_[1]);
     } else {
@@ -341,7 +330,7 @@ void AlthermaHub::handle_complete_frame_() {
       write_pos += static_cast<size_t>(written);
     }
 
-    this->publish_manual_query_statusf_(ManualQueryStatusLevel::INFO,
+    this->publish_manual_query_statusf_(ESP_LOG_INFO,
                                         "Manual query result reg=0x%02X value=%s buffer=%s",
                                         this->manual_register_, label.asString, frame_hex);
 
