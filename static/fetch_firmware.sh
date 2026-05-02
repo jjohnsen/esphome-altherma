@@ -9,6 +9,7 @@ mkdir -p "$OUT_DIR"
 
 #curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/tags/v1.0.4" \
 curl -sL "https://api.github.com/repos/$OWNER/$REPO/releases/latest" \
+  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
 | ruby -r json -e '
 data = JSON.parse(STDIN.read)
 if data.is_a?(Hash) && data["assets"].is_a?(Array)
