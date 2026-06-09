@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
 OWNER="jjohnsen"
 REPO="esphome-altherma"
 OUT_DIR="_site/firmware"
