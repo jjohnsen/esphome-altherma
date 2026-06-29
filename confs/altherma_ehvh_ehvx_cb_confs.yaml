@@ -1,0 +1,911 @@
+# Mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW systems.
+# Built from ESPAltherma definition: ALTHERMA(LT_CA_CB_11-16KW).h
+# Use this as: packages: !include confs/altherma_ehvh_ehvx_cb.yaml
+#
+# Notes:
+# - This is read-only sensor mapping for jjohnsen/esphome-altherma altherma_hub.
+# - For 4-8kW CB units most indoor registers are the same, but the 0x30 outdoor fan/valve layout can differ.
+# - Values with Conv xxx not avail. from your JSON are intentionally omitted.
+
+.altherma_base: &altherma_base
+  platform: altherma_hub
+  altherma_hub_id: altherma_hub_1
+
+.temp: &temp
+  <<: *altherma_base
+  device_class: temperature
+  unit_of_measurement: °C
+  state_class: measurement
+  accuracy_decimals: 1
+
+.pressure: &pressure
+  <<: *altherma_base
+  device_class: pressure
+  unit_of_measurement: bar
+  state_class: measurement
+  accuracy_decimals: 1
+
+.current: &current
+  <<: *altherma_base
+  device_class: current
+  unit_of_measurement: A
+  state_class: measurement
+  accuracy_decimals: 1
+
+.voltage: &voltage
+  <<: *altherma_base
+  device_class: voltage
+  unit_of_measurement: V
+  state_class: measurement
+  accuracy_decimals: 0
+
+.number: &number
+  <<: *altherma_base
+  state_class: measurement
+  accuracy_decimals: 1
+
+.binary: &binary
+  <<: *altherma_base
+
+.text: &text
+  <<: *altherma_base
+
+sensor:
+  # Outdoor unit info
+  - <<: *number
+    name: Sensor Data Qty
+    register: 0x00
+    offset: 0
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: INV compressor Qty
+    register: 0x00
+    offset: 1
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: STD compressor Qty
+    register: 0x00
+    offset: 2
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Fan Data Qty
+    register: 0x00
+    offset: 3
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Expansion Valve Data Qty
+    register: 0x00
+    offset: 4
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: 4 Way Valve Data Qty
+    register: 0x00
+    offset: 5
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Crank Case Heater Qty
+    register: 0x00
+    offset: 6
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Solenoid valve Qty
+    register: 0x00
+    offset: 7
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Max. connectable indoor units
+    register: 0x00
+    offset: 8
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Connected Indoor Unit Qty
+    register: 0x00
+    offset: 9
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: O/U MPU ID (xx)
+    register: 0x00
+    offset: 10
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: O/U MPU ID (yy)
+    register: 0x00
+    offset: 11
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: O/U capacity
+    register: 0x00
+    offset: 12
+    convid: 105
+    datasize: 1
+    unit_of_measurement: kW
+    accuracy_decimals: 1
+
+  # Outdoor control temperatures
+  - <<: *temp
+    name: Target Evap. Temp.
+    register: 0x10
+    offset: 6
+    convid: 114
+    datasize: 2
+  - <<: *temp
+    name: Target Cond. Temp.
+    register: 0x10
+    offset: 8
+    convid: 114
+    datasize: 2
+
+  # Outdoor temperatures and pressure
+  - <<: *temp
+    name: Outdoor air temp. (R1T)
+    register: 0x20
+    offset: 0
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: O/U Heat Exch. Temp.
+    register: 0x20
+    offset: 2
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Discharge pipe temp.
+    register: 0x20
+    offset: 4
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Suction pipe temp.
+    register: 0x20
+    offset: 6
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Heat exchanger mid-temp.
+    register: 0x20
+    offset: 8
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Liquid pipe temp. (R6T)
+    register: 0x20
+    offset: 10
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Heat sink temp.
+    register: 0x20
+    offset: 12
+    convid: 105
+    datasize: 2
+  - <<: *pressure
+    name: Pressure sensor
+    register: 0x20
+    offset: 14
+    convid: 105
+    datasize: 2
+
+  # Outdoor electrical and refrigerant/brine values
+  - <<: *current
+    name: INV primary current
+    register: 0x21
+    offset: 0
+    convid: 105
+    datasize: 2
+  - <<: *current
+    name: INV secondary current
+    register: 0x21
+    offset: 2
+    convid: 105
+    datasize: 2
+  - <<: *voltage
+    name: Voltage N-phase
+    register: 0x21
+    offset: 4
+    convid: 101
+    datasize: 2
+  - <<: *temp
+    name: Brine inlet temp.
+    register: 0x21
+    offset: 7
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Brine outlet temp.
+    register: 0x21
+    offset: 9
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Refrig. temp. evap. In
+    register: 0x21
+    offset: 11
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Refrig. temp. evap. Out
+    register: 0x21
+    offset: 13
+    convid: 105
+    datasize: 2
+
+  # Outdoor inverter, fan and valve values - 11-16kW CB layout
+  - <<: *number
+    name: INV frequency
+    register: 0x30
+    offset: 0
+    convid: 152
+    datasize: 1
+    unit_of_measurement: rps
+    accuracy_decimals: 0
+  - <<: *number
+    name: Fan 1
+    register: 0x30
+    offset: 1
+    convid: 211
+    datasize: 1
+    unit_of_measurement: step
+    accuracy_decimals: 0
+  - <<: *number
+    name: Fan 2
+    register: 0x30
+    offset: 2
+    convid: 211
+    datasize: 1
+    unit_of_measurement: step
+    accuracy_decimals: 0
+  - <<: *number
+    name: Expansion valve 1
+    register: 0x30
+    offset: 3
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    accuracy_decimals: 0
+  - <<: *number
+    name: Expansion valve 2
+    register: 0x30
+    offset: 5
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    accuracy_decimals: 0
+
+  # Indoor unit status/info
+  - <<: *number
+    name: Indoor Unit Address
+    register: 0x60
+    offset: 1
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: Error detailed code
+    register: 0x60
+    offset: 4
+    convid: 314
+    datasize: 2
+    accuracy_decimals: 0
+  - <<: *number
+    name: I/U capacity code
+    register: 0x60
+    offset: 6
+    convid: 219
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *temp
+    name: DHW setpoint
+    register: 0x60
+    offset: 7
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: LW setpoint main
+    register: 0x60
+    offset: 9
+    convid: 105
+    datasize: 2
+  - <<: *number
+    name: Indoor Option Code
+    register: 0x60
+    offset: 13
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: I/U EEPROM Ver.
+    register: 0x60
+    offset: 16
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+
+  # Indoor temperatures
+  - <<: *temp
+    name: Leaving water temp. before BUH (R1T)
+    register: 0x61
+    offset: 2
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Leaving water temp. after BUH (R2T)
+    register: 0x61
+    offset: 4
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Refrig. Temp. liquid side (R3T)
+    register: 0x61
+    offset: 6
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Inlet water temp. (R4T)
+    register: 0x61
+    offset: 8
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: DHW tank temp. (R5T)
+    register: 0x61
+    offset: 10
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Indoor ambient temp. (R1T)
+    register: 0x61
+    offset: 12
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Ext. indoor ambient sensor (R6T)
+    register: 0x61
+    offset: 14
+    convid: 105
+    datasize: 2
+
+  # Indoor setpoints, flow and pump
+  - <<: *temp
+    name: LW setpoint add
+    register: 0x62
+    offset: 3
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: RT setpoint
+    register: 0x62
+    offset: 5
+    convid: 105
+    datasize: 2
+  - <<: *number
+    name: Flow sensor
+    register: 0x62
+    offset: 9
+    convid: 105
+    datasize: 2
+    unit_of_measurement: l/min
+    accuracy_decimals: 1
+  - <<: *pressure
+    name: Water pressure
+    register: 0x62
+    offset: 11
+    convid: 105
+    datasize: 1
+  - <<: *number
+    name: Water pump signal
+    register: 0x62
+    offset: 12
+    convid: 152
+    datasize: 1
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+  - <<: *number
+    name: 3 way Valve Mixing 1
+    register: 0x62
+    offset: 13
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: 3 way Valve Mixing 2
+    register: 0x62
+    offset: 14
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+
+  # Hybrid/extra block present in CB def; harmless if unsupported/0
+  - <<: *number
+    name: BE COP
+    register: 0x64
+    offset: 3
+    convid: 105
+    datasize: 2
+    accuracy_decimals: 1
+  - <<: *temp
+    name: Hybrid Heating Target Temp.
+    register: 0x64
+    offset: 5
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Boiler Heating Target Temp.
+    register: 0x64
+    offset: 7
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Mixed water temp. (R7T)
+    register: 0x64
+    offset: 10
+    convid: 118
+    datasize: 2
+
+binary_sensor:
+  # Outdoor state bits
+  - <<: *binary
+    name: Thermostat ON/OFF outdoor
+    register: 0x10
+    offset: 1
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Restart standby
+    register: 0x10
+    offset: 1
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: Startup Control
+    register: 0x10
+    offset: 1
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: Defrost Operation
+    register: 0x10
+    offset: 1
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Oil Return Operation
+    register: 0x10
+    offset: 1
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Pressure equalizing operation
+    register: 0x10
+    offset: 1
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Demand Signal
+    register: 0x10
+    offset: 1
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Low noise control
+    register: 0x10
+    offset: 1
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Discharge Temp. Drop
+    register: 0x10
+    offset: 10
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Comp. INV Current Drop
+    register: 0x10
+    offset: 10
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: HP Drop Control
+    register: 0x10
+    offset: 11
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: LP Drop Control
+    register: 0x10
+    offset: 11
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Fin Temp. Drop Control
+    register: 0x10
+    offset: 12
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Other Drop Control
+    register: 0x10
+    offset: 12
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Brine Flow Switch
+    register: 0x21
+    offset: 6
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: 4 Way Valve 1
+    register: 0x30
+    offset: 7
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: 4 Way Valve 2
+    register: 0x30
+    offset: 7
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: 4 Way Valve 3
+    register: 0x30
+    offset: 7
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: 4 Way Valve 4
+    register: 0x30
+    offset: 7
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: 4 Way Valve 5
+    register: 0x30
+    offset: 7
+    convid: 303
+    datasize: 1
+
+  # Indoor state bits
+  - <<: *binary
+    name: Data Enable Disable 60
+    register: 0x60
+    offset: 0
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Thermostat ON/OFF indoor
+    register: 0x60
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Freeze Protection
+    register: 0x60
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Silent Mode
+    register: 0x60
+    offset: 2
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Freeze Protection for water piping
+    register: 0x60
+    offset: 2
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Water flow switch
+    register: 0x60
+    offset: 11
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Thermal protector BUH
+    register: 0x60
+    offset: 11
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: Thermal protector BSH
+    register: 0x60
+    offset: 11
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: Benefit kWh rate power supply
+    register: 0x60
+    offset: 11
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Solar input
+    register: 0x60
+    offset: 11
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Bivalent Operation
+    register: 0x60
+    offset: 11
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: 2way valve On Heat Off Cool
+    register: 0x60
+    offset: 12
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: 3way valve On DHW Off Space
+    register: 0x60
+    offset: 12
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: BSH
+    register: 0x60
+    offset: 12
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: BUH Step1
+    register: 0x60
+    offset: 12
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: BUH Step2
+    register: 0x60
+    offset: 12
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Water pump operation
+    register: 0x60
+    offset: 12
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Solar pump operation
+    register: 0x60
+    offset: 12
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Data Enable Disable 61
+    register: 0x61
+    offset: 0
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Data Enable Disable 62
+    register: 0x62
+    offset: 0
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Reheat ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Storage ECO ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: Storage comfort ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: Powerful DHW Operation ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Space heating Operation ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: System OFF
+    register: 0x62
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Emergency indoor active
+    register: 0x62
+    offset: 2
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Add. Ext. RT Input Cool.
+    register: 0x62
+    offset: 7
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Add. Ext. RT Input Heat.
+    register: 0x62
+    offset: 7
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: Main RT Cooling
+    register: 0x62
+    offset: 7
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: Main RT Heating
+    register: 0x62
+    offset: 7
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Pwr consumption limit 4
+    register: 0x62
+    offset: 7
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Pwr consumption limit 3
+    register: 0x62
+    offset: 7
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Pwr consumption limit 2
+    register: 0x62
+    offset: 7
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Pwr consumption limit 1
+    register: 0x62
+    offset: 7
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Tank preheat ON/OFF
+    register: 0x62
+    offset: 8
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Circulation pump operation
+    register: 0x62
+    offset: 8
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Alarm output
+    register: 0x62
+    offset: 8
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Space H Operation output
+    register: 0x62
+    offset: 8
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Data Enable Disable 63
+    register: 0x63
+    offset: 0
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Data Enable Disable 64
+    register: 0x64
+    offset: 0
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Boiler Operation Demand
+    register: 0x64
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Boiler DHW Demand
+    register: 0x64
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Bypass Valve Output
+    register: 0x64
+    offset: 2
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Add pump
+    register: 0x64
+    offset: 9
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Main pump
+    register: 0x64
+    offset: 9
+    convid: 300
+    datasize: 1
+
+text_sensor:
+  - <<: *text
+    name: Operation Mode
+    icon: mdi:heat-pump
+    register: 0x10
+    offset: 0
+    convid: 217
+    datasize: 1
+  - <<: *text
+    name: Error type outdoor
+    icon: mdi:alert-circle-outline
+    register: 0x10
+    offset: 4
+    convid: 203
+    datasize: 1
+  - <<: *text
+    name: Error Code outdoor
+    icon: mdi:alert-circle-outline
+    register: 0x10
+    offset: 5
+    convid: 204
+    datasize: 1
+  - <<: *text
+    name: I/U operation mode
+    icon: mdi:heat-pump
+    register: 0x60
+    offset: 2
+    convid: 315
+    datasize: 1
+  - <<: *text
+    name: Error Code indoor
+    icon: mdi:alert-circle-outline
+    register: 0x60
+    offset: 3
+    convid: 204
+    datasize: 1
+  - <<: *text
+    name: Hybrid Op. Mode
+    icon: mdi:heat-pump
+    register: 0x64
+    offset: 2
+    convid: 316
+    datasize: 1
