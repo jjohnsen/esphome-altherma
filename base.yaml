@@ -68,6 +68,8 @@ text_sensor:
 #     optimistic: true
 
 packages:
+  common_diagnostics: !include common/diagnostics.yaml
+
   # Uncomment below if you want to "Take Control" in ESPHome Device Builder
   # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
   # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
