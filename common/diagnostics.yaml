@@ -1,0 +1,66 @@
+globals:
+  - id: boot_count
+    type: int
+    restore_value: true
+    initial_value: '0'
+
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - lambda: |-
+          id(boot_count) += 1;
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    entity_category: "diagnostic"
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: internal_temperature
+    name: "Internal Temperature"
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: template
+    name: "Boot Count"
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: |-
+      return id(boot_count);
+    entity_category: "diagnostic"
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    hide_timestamp: true
+    entity_category: "diagnostic"
+
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      entity_category: "diagnostic"
+    ssid:
+      name: "WiFi SSID"
+      entity_category: "diagnostic"
+    bssid:
+      name: "WiFi BSSID"
+      entity_category: "diagnostic"
+    mac_address:
+      name: "MAC Address"
+      entity_category: "diagnostic"
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: "config"
