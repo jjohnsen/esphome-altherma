@@ -1,11 +1,5 @@
 # Mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW systems.
-# Built from ESPAltherma definition: ALTHERMA(LT_CA_CB_11-16KW).h
 # Use this as: packages: !include confs/altherma_ehvh_ehvx_cb.yaml
-#
-# Notes:
-# - This is read-only sensor mapping for jjohnsen/esphome-altherma altherma_hub.
-# - For 4-8kW CB units most indoor registers are the same, but the 0x30 outdoor fan/valve layout can differ.
-# - Values with Conv xxx not avail. from your JSON are intentionally omitted.
 
 .altherma_base: &altherma_base
   platform: altherma_hub
