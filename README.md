@@ -228,9 +228,8 @@ components/altherma_hub/
   binary_sensor.py                 # Binary sensor platform
   text_sensor.py                   # Text sensor platform
   mock_uart.h                      # Mock UART for testing
-  lib/
-    converters.h                   # Vendored from ESPAltherma
-    labeldef.h                     # Vendored from ESPAltherma
+  converters.h                     # Vendored from ESPAltherma (guarded impl header)
+  labeldef.h                       # Vendored from ESPAltherma
 ```
 
 ### Vendored ESPAltherma Files
@@ -239,8 +238,8 @@ This project vendors selected files from [ESPAltherma](https://github.com/raomin
 
 | Source File | Local Path |
 | -- | -- |
-| `include/converters.h` | `components/altherma_hub/lib/converters.h` |
-| `include/labeldef.h` | `components/altherma_hub/lib/labeldef.h` |
+| `include/converters.h` | `components/altherma_hub/converters.h` |
+| `include/labeldef.h` | `components/altherma_hub/labeldef.h` |
 
 **To update vendored files from upstream:**
 
@@ -252,12 +251,19 @@ git fetch espaltherma
 git checkout espaltherma/main -- include/converters.h
 git checkout espaltherma/main -- include/labeldef.h
 
-git mv -f include/converters.h components/altherma_hub/lib/converters.h
-git mv -f include/labeldef.h components/altherma_hub/lib/labeldef.h
+git mv -f include/converters.h components/altherma_hub/converters.h
+git mv -f include/labeldef.h components/altherma_hub/labeldef.h
 
 git commit -m "Update ESPAltherma vendored files"
 rmdir include
 ```
+
+> **Note:** `converters.h` is an implementation header. ESPHome (>= 2026.7)
+> auto-includes every root component header into the generated `esphome.h`, so
+> after updating it from upstream you must re-wrap its body with the
+> `#ifdef ALTHERMA_HUB_IMPL` / `#endif` guard. `altherma_hub.cpp` defines
+> `ALTHERMA_HUB_IMPL` before including it. Without the guard the file is compiled
+> at global scope in `main.cpp` and fails (`labelDefs`/`LabelDef` not in scope).
 
 ## Contributing
 

@@ -1,4 +1,11 @@
 // convert read registry value to the expected format based on convID
+//
+// This is an implementation header vendored from ESPAltherma. It is meant to be
+// included only from altherma_hub.cpp (after labelDefs, Serial, etc. are
+// defined). ESPHome >= 2026.7 auto-includes every root component header into the
+// generated esphome.h; the guard below makes that include a harmless no-op so
+// the body is not compiled at global scope in main.cpp.
+#ifdef ALTHERMA_HUB_IMPL
 #include <string.h>
 char buff[64];
 class Converter
@@ -482,3 +489,4 @@ private:
         return result;
     }
 };
+#endif  // ALTHERMA_HUB_IMPL

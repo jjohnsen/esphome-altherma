@@ -2,8 +2,6 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
 from esphome.components import uart, text_sensor
-import os
-from pathlib import Path
 
 DEPENDENCIES = ["uart", "api"]
 AUTO_LOAD = ["sensor", "text_sensor", "binary_sensor"]
@@ -36,12 +34,6 @@ async def to_code(config):
     if "query_result_text_sensor" in config:
         query_sensor = await cg.get_variable(config["query_result_text_sensor"])
         cg.add(var.set_query_result_text_sensor(query_sensor))
-
-    # Get the absolute path to the lib directory
-    lib_path = Path(__file__).parent / "lib"
-    
-    # Add as extra script to copy files
-    cg.add_platformio_option("build_flags", [f"-I{lib_path.as_posix()}"])
 
 
 # Shared configuration constants
