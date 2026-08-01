@@ -75,7 +75,11 @@ packages:
   # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
   # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
   # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erla_d_ebsh_11_16_ech2o.yaml@main
+  # Alternative model mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW:
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/altherma_ehvh_ehvx_cb.yaml@main
   # Comment below if you want to "Take Control" in ESPHome Device Builder
   altherma_sensors: !include confs/erga_eh_da_04_08.yaml
   # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
   # altherma_sensors: !include confs/erla_d_ebsh_11_16_ech2o.yaml
+  # Alternative model mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW:
+  # altherma_sensors: !include confs/altherma_ehvh_ehvx_cb.yaml

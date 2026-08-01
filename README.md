@@ -80,7 +80,7 @@ Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?ta
 
 ## Installation
 
-> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** and the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**. Contributions for other models are welcome!
+> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)**, the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, and **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**. Contributions for other models are welcome!
 
 ### Option 1: Browser Install (ESP Web Tools)
 
@@ -126,6 +126,16 @@ Model files define the available sensors for specific Altherma units. Each senso
 **Available models:**
 - `erga_eh_da_04_08.yaml` - ERGA-D EHV/EHB/EHVZ DA series (04-08kW)
 - `erla_d_ebsh_11_16_ech2o.yaml` - EBSXB16P50DF / ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O
+- `altherma_ehvh_ehvx_cb.yaml` - Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB (11-16kW)
+
+### Packages In `base.yaml`
+
+The `packages:` block in `base.yaml` supports two workflows:
+
+- `!include github://jjohnsen/esphome-altherma/...@main` is for **"Take Control" in ESPHome Device Builder**. In this mode, YAML files are fetched from GitHub.
+- `!include confs/...` is for **local compilation** (for example `esphome run ...` from this cloned repository). In this mode, files are read from your local workspace.
+
+You can also enable additional ESP diagnostics (status, uptime, Wi-Fi info, internal temperature, boot count, restart button) by uncommenting the diagnostics package line.
 
 **Community-contributed models:**
 - [EHVX configs by @MaBeniu](https://github.com/MaBeniu/esphome-altherma/tree/main/confs)
@@ -220,6 +230,9 @@ esphome-altherma-atoms3.yaml       # Board config: M5Stack AtomS3 Lite
 confs/
   erga_eh_da_04_08.yaml            # Sensor definitions for ERGA-D series
   erla_d_ebsh_11_16_ech2o.yaml     # Sensor definitions for ERLA D EBSH-X 11-16kW-ECH2O
+  altherma_ehvh_ehvx_cb.yaml       # Sensor definitions for Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW
+common/
+  diagnostics.yaml                 # Optional ESP diagnostics package
 components/altherma_hub/
   __init__.py                      # ESPHome component definition (Python)
   altherma_hub.cpp                 # Hub implementation (C++)
