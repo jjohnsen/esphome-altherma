@@ -24,6 +24,7 @@ jobs:
         file:
           - esphome-altherma-esp32
           - esphome-altherma-esp32-s3
+          - esphome-altherma-esp8266
           - esphome-altherma-atoms3
         #### Modify above here to match your project ####
 
