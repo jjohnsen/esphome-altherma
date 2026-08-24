@@ -145,6 +145,7 @@ You can also enable additional ESP diagnostics (status, uptime, Wi-Fi info, inte
 Choose the YAML file matching your board:
 - `esphome-altherma-esp32.yaml` - Generic ESP32
 - `esphome-altherma-esp32-s3.yaml` - ESP32-S3 DevKit
+- `esphome-altherma-esp8266.yaml` - Generic ESP8266
 - `esphome-altherma-atoms3.yaml` - M5Stack AtomS3 Lite
 
 Each includes `base.yaml` (shared component setup) and the model config from `confs/`.

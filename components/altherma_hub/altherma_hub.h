@@ -124,7 +124,7 @@ namespace esphome
 
       unsigned char calculate_crc(unsigned char *src, size_t len);
       bool decode_label(AlthermaSensorBase *sensor, unsigned char *frame, size_t frame_len, LabelDef &out);
-      void publish_manual_query_statusf_(esp_log_level_t level, const char *fmt, ...);
+      void publish_manual_query_statusf_(int level, const char *fmt, ...);
       void begin_poll_cycle_();
       void start_query_(uint8_t reg);
       void read_response_();
