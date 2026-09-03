@@ -32,7 +32,7 @@ No command line needed. See [Installation](#installation) for more options.
 
 - **Real-time sensor data** - temperatures, voltages, currents, flow rates, pressures, fan speeds, and more
 - **Model-specific configuration** via modular YAML files for different Altherma units
-- **Multiple board support** - ESP32, ESP32-S3, and M5Stack AtomS3 Lite
+- **Multiple board support** - ESP8266, ESP32, ESP32-S3, and M5Stack AtomS3 Lite
 - **Browser-based installation** via [ESP Web Tools](https://esphome.github.io/esp-web-tools/) (no command line needed)
 - **OTA updates** with automatic update checking via GitHub releases
 - **Mock UART mode** for development and testing without hardware
@@ -41,13 +41,14 @@ No command line needed. See [Installation](#installation) for more options.
 
 | Board | YAML Config | UART RX Pin | UART TX Pin |
 | -- | -- | -- | -- |
+| [ESP8266 D1 Mini](https://docs.wemos.cc/en/latest/d1/d1_mini.html) | `esphome-altherma-esp8266.yaml` | GPIO 5 | GPIO 4 |
 | [ESP32 DevKit](https://www.espboards.dev/esp32/esp32doit-devkit-v1/) | `esphome-altherma-esp32.yaml` | GPIO 16 | GPIO 17 |
 | [ESP32-S3 DevKit](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/) | `esphome-altherma-esp32-s3.yaml` | GPIO 2 | GPIO 1 |
 | [M5Stack AtomS3 Lite](https://docs.m5stack.com/en/core/AtomS3%20Lite) | `esphome-altherma-atoms3.yaml` | GPIO 2 (G1) | GPIO 1 (G2) |
 
 ## Hardware Requirements
 
-* ESP32 development board (ESP8266 may also work)
+* ESP8266 or ESP32 development board
 * Daikin Altherma heat pump with X10A connector
 * 5-pin JST EH 2.5 mm connector or 4 Dupont M-F wires
 
