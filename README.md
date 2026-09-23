@@ -81,7 +81,7 @@ Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?ta
 
 ## Installation
 
-> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)**, the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, and **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**. Contributions for other models are welcome!
+> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)**, the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**, and **EPRA D/D7 with ETV16, ETB16, ETVZ16 (E/E7) 14-18kW** (including ETBX16E9W7 / EPRA18DW17). Contributions for other models are welcome!
 
 ### Option 1: Browser Install (ESP Web Tools)
 
@@ -128,6 +128,7 @@ Model files define the available sensors for specific Altherma units. Each senso
 - `erga_eh_da_04_08.yaml` - ERGA-D EHV/EHB/EHVZ DA series (04-08kW)
 - `erla_d_ebsh_11_16_ech2o.yaml` - EBSXB16P50DF / ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O
 - `altherma_ehvh_ehvx_cb.yaml` - Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB (11-16kW)
+- `epra_d_etv_etb_etvz_14_18.yaml` - EPRA D/D7 with ETV16, ETB16 (including wall-mounted ETBX), ETVZ16 E/E7 series (14-18kW). Mapped for ETBX16E9W7 / EPRA18DW17
 
 ### Packages In `base.yaml`
 
@@ -233,6 +234,7 @@ confs/
   erga_eh_da_04_08.yaml            # Sensor definitions for ERGA-D series
   erla_d_ebsh_11_16_ech2o.yaml     # Sensor definitions for ERLA D EBSH-X 11-16kW-ECH2O
   altherma_ehvh_ehvx_cb.yaml       # Sensor definitions for Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW
+  epra_d_etv_etb_etvz_14_18.yaml   # Sensor definitions for EPRA D 14-18kW / ETBX16E9W7 + EPRA18DW17
 common/
   diagnostics.yaml                 # Optional ESP diagnostics package
 components/altherma_hub/
