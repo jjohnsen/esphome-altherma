@@ -78,10 +78,14 @@ Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?ta
 | DOIT ESP32 DEVKIT V1   | EHVX08S26CB9W                            | @MaBeniu  | https://github.com/jjohnsen/esphome-altherma/discussions/5
 | esp32dev | ERLQ011CAV3 / EHBX11CB9W || [Detailed setup guide in French](https://domo.rem81.com/index.php/2026/01/12/ha-monitoring-de-ma-pac-daikin-altherma-avec-esphome-esphome-altherma-alternative-a-espaltherma/)
 | ESP32-C6-WROOM-1       | EHBH16C9W                         | @AndriesMuylaert | Includes relay + onboard sensors - https://github.com/jjohnsen/esphome-altherma/discussions/11
+| Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13
+| ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25
+| ESP32-S3 DevKit        | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41
 
 ## Installation
 
-> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)**, the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, and **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**. Contributions for other models are welcome!
+> **⚠️ Note:** This repo currently includes sensor mappings for the **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** (also confirmed working on the bibloc **Altherma 3 R MT (ERRA + ELVH/ELVX)** series — see [discussion #41](https://github.com/jjohnsen/esphome-altherma/discussions/41)), the **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, and **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**. Contributions for other models are welcome!
+
 
 ### Option 1: Browser Install (ESP Web Tools)
 
