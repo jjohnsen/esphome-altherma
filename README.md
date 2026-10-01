@@ -4,7 +4,7 @@
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-integration-41BDF5?logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
 [![GitHub stars](https://img.shields.io/github/stars/jjohnsen/esphome-altherma)](https://github.com/jjohnsen/esphome-altherma/stargazers)
 
-A native [ESPHome](https://esphome.io/) custom component for monitoring Daikin Altherma 3 heat pumps via the X10A connector. It exposes temperatures, voltages, currents, and other operational data directly to [Home Assistant](https://www.home-assistant.io/). No MQTT, no manual config, just plug and play.
+A native [ESPHome](https://esphome.io/) custom component for monitoring Daikin Altherma 3 heat pumps via the X10A connector. It exposes temperatures, voltages, currents, and other operational data directly to [Home Assistant](https://www.home-assistant.io/). Native Home Assistant integration through ESPHome. No MQTT required.
 
 🌐 [Web Installer](https://esphome-altherma.jjohnsen.no) · 💬 [HA Community](https://community.home-assistant.io/t/esphome-altherma-monitor-your-daikin-altherma-3-heat-pump-via-x10a/1000476) · 🗨️ [Discussions](https://github.com/jjohnsen/esphome-altherma/discussions) · 📖 [Emoncms Setup Guide](https://jjohnsen.no/2026/esphome-altherma-emoncms-setup-guide/)
 
@@ -148,7 +148,7 @@ OTA Updates are available within Home Assistant:
 1. [Install ESPHome](https://esphome.io/guides/getting_started_command_line/)
 2. Clone this repository:
    ```sh
-   git clone [https://github.com/jjohnsen/esphome-altherma.git](https://github.com/jjohnsen/esphome-altherma.git)
+   git clone https://github.com/jjohnsen/esphome-altherma.git
    cd esphome-altherma
    ```
 3. Configure Wi-Fi credentials in `secrets.yaml`:
@@ -308,7 +308,7 @@ This project vendors selected files from [ESPAltherma](https://github.com/raomin
 
 ```bash
 # Add ESPAltherma as a remote (one-time setup)
-git remote add espaltherma [https://github.com/raomin/ESPAltherma.git](https://github.com/raomin/ESPAltherma.git)
+git remote add espaltherma https://github.com/raomin/ESPAltherma.git
 
 git fetch espaltherma
 git checkout espaltherma/main -- include/converters.h
