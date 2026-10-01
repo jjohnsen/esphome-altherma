@@ -57,7 +57,7 @@ globals:
     restore_value: yes
     initial_value: 'true'
 
-# Switch para controlar o modo escuro (aparece no menu do ecrã, no Web Server e no Home Assistant)
+# Switch for controlling the dark mode on the M5Stack display
 switch:
   - platform: template
     name: "M5 Dark Mode"
@@ -87,6 +87,7 @@ light:
     id: backlight
     restore_mode: ALWAYS_ON
     default_transition_length: 0.5s
+    internal: true
 
 # Backlight timeout and UI navigation scripts
 script:
@@ -130,7 +131,7 @@ script:
   - id: ui_toggle_detail
     then:
       - lambda: |-
-          // Constroi lista unificada com os mesmos tipos
+          // Build unified list with the same item types
           struct Entry { void *ptr; uint8_t type; };
           std::vector<Entry> items;
           items.reserve(64);
@@ -151,16 +152,17 @@ script:
 
           if (!items.empty()) {
             int selected = (id(ui_selected_index) % items.size() + items.size()) % items.size();
-            // Se o item selecionado for um switch (como o Dark Mode), comuta logo o estado!
+            // If the selected item is a switch (like the Dark Mode), toggle its state immediately!
             if (items[selected].type == 3) {
               static_cast<switch_::Switch *>(items[selected].ptr)->toggle();
+              id(ui_detail_mode) = false;
               return;
             }
           }
-          // Para os restantes sensores, abre o detalhe normal
+          // For the remaining sensors, open the normal detail view
           id(ui_detail_mode) = !id(ui_detail_mode);
       - component.update: m5_display
-
+  
 # M5Stack buttons
 binary_sensor:
   - platform: gpio
@@ -169,6 +171,7 @@ binary_sensor:
       inverted: true
     name: "M5 Button A"
     id: button_a
+    internal: true
     on_press:
       - script.execute: backlight_timer
       - script.execute: ui_prev
@@ -179,6 +182,7 @@ binary_sensor:
       inverted: true
     name: "M5 Button B"
     id: button_b
+    internal: true
     on_press:
       - script.execute: backlight_timer
       - script.execute: ui_next
@@ -189,6 +193,7 @@ binary_sensor:
       inverted: true
     name: "M5 Button C"
     id: button_c
+    internal: true
     on_press:
       - script.execute: backlight_timer
       - script.execute: ui_toggle_detail
@@ -238,11 +243,11 @@ display:
     id: m5_display
     model: M5CORE
     rotation: 0
-    invert_colors: true
+
     lambda: |-
       bool dark = id(dark_mode);
 
-      // Paleta dinamica
+      // Dynamic color palette
       Color bg_color       = dark ? Color::BLACK : Color::WHITE;
       Color header_bg      = dark ? Color(0x18, 0x18, 0x18) : Color(0xE0, 0xE0, 0xE0);
       Color header_title   = dark ? Color(0xFF, 0xCC, 0x00) : Color(0x00, 0x55, 0xAA);
@@ -251,7 +256,7 @@ display:
       Color detail_label   = dark ? Color(0x64, 0xB5, 0xF6) : Color(0x00, 0x77, 0x99);
       Color hint_color     = dark ? Color(0x80, 0x80, 0x80) : Color(0x66, 0x66, 0x66);
 
-      // Fundo
+      // Background
       it.fill(bg_color);
 
       // Header bar
@@ -367,5 +372,14 @@ display:
           auto *s = static_cast<switch_::Switch *>(e.ptr);
           it.printf(10, 106, id(font_large), text_highlight, "%s", s->state ? "ON" : "OFF");
         }
-        it.printf(10, 206, id(font_small), hint_color, "Press C to toggle / return");
       }
+      // Bottom button hints
+      it.filled_rectangle(0, 218, 320, 22, header_bg);
+
+      if (!id(ui_detail_mode)) {
+        it.printf(8, 221, id(font_small), hint_color,
+                  "A: Prev    B: Next    C: Select");
+      } else {
+        it.printf(8, 221, id(font_small), hint_color,
+                  "A: Prev    B: Next    C: Back");
+      }      
