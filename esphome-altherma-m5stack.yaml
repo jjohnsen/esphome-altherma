@@ -130,7 +130,7 @@ binary_sensor:
     id: button_b
     on_press:
       - script.execute: backlight_timer
-      - script.execute: ui_next      
+      - script.execute: ui_next
 
   - platform: gpio
     pin:
@@ -191,7 +191,7 @@ display:
       // Header bar with WiFi signal indicator
       it.filled_rectangle(0, 0, 320, 28, Color(0x40, 0x40, 0x40));
       it.printf(8, 6, id(font_small), Color::WHITE, "%s", App.get_name().c_str());
-      
+
       // WiFi signal indicator (upper right)
       if (id(wifi_signal_sensor).has_state()) {
         int rssi = (int)id(wifi_signal_sensor).state;
@@ -277,7 +277,7 @@ display:
         const char *name = entry_name(e);
         it.printf(10, 40, id(font_small), Color(0xA5, 0xD6, 0xA7), "Selected sensor:");
         it.printf(10, 66, id(font_small), "%s", name);
-        
+
         if (e.type == 0) {
           auto *s = static_cast<sensor::Sensor *>(e.ptr);
           const int dec = s->get_accuracy_decimals() >= 0 ? s->get_accuracy_decimals() : 1;

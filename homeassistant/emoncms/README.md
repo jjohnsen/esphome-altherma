@@ -42,7 +42,7 @@ node migrate_feed.js --base-url https://192.168.1.x:7443 --apikey YOUR_KEY --sou
 
 ## Important notes
 
-- **Clear the target feed before migrating** if it already contains live data with a future `start_time`. Historical inserts before the feed's `start_time` are silently dropped by Emoncms Engine 5 (FIXED).  
+- **Clear the target feed before migrating** if it already contains live data with a future `start_time`. Historical inserts before the feed's `start_time` are silently dropped by Emoncms Engine 5 (FIXED).
   Clear via: `GET /feed/clear.json?id=TARGET_ID&apikey=KEY`
 - `POST /feed/post.json` is for live data only — it silently drops historical timestamps. This script uses `/feed/insert.json` instead.
 - Timestamps are aligned to the nearest multiple of the target interval (e.g. 30 s) to satisfy the FIXED engine's indexing requirement.

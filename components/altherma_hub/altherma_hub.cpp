@@ -20,7 +20,7 @@ LabelDef labelDefs[] = {};
     template<typename... Args>
     void printf(const char *fmt, Args... args) {
       ESP_LOGV(CONV_TAG, fmt, args...);
-    }  
+    }
   };
   static FakeSerial Serial;
 
@@ -46,9 +46,9 @@ void AlthermaHub::register_sensor(AlthermaSensorBase *sensor) {
 void AlthermaHub::setup() {
   ESP_LOGI(TAG, "Altherma hub setup");
   this->converter_ = new Converter();
-  
+
   this->register_service(&AlthermaHub::queue_manual_query, "query_register",
-                         {"register", "offset", "convid", "datasize"});  
+                         {"register", "offset", "convid", "datasize"});
 }
 
 AlthermaHub::~AlthermaHub() {
@@ -124,7 +124,7 @@ void AlthermaHub::queue_manual_query(std::string registry_id, int32_t offset, in
 
   char *end = nullptr;
   errno = 0;
-  
+
   long value = std::strtol(registry_id.c_str(), &end, 0);  // base 0: auto-detect 0x, decimal, octal
   if (end == registry_id.c_str() || *end != '\0' || errno != 0) {
     this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
@@ -378,7 +378,7 @@ void AlthermaHub::advance_register_() {
     this->query_state_ = QueryState::IDLE;
     return;
   }
-    
+
   this->register_index_++;
   if (this->register_index_ >= this->registers_.size()) {
     this->poll_active_ = false;

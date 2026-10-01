@@ -8,14 +8,14 @@ blueprint:
       default: ESPHome_Altherma
       selector:
         text:
-        
+
     interval_seconds:
       name: Interval in seconds
       description: Use /30 for every 30 seconds
       default: "/30"
       selector:
         text:
-    
+
     heatpump_primary_current:
       name: heatpump_primary_current
       description: Used to calculate Electric use in watts (heatpump_elec), typical ESPHome Altherma - INV primary current (A)
@@ -124,7 +124,7 @@ blueprint:
       default: ""
       selector:
         entity:
-          domain: sensor          
+          domain: sensor
           device_class: temperature
 
     buh_step1:
@@ -142,7 +142,7 @@ blueprint:
       selector:
         number:
           unit_of_measurement: W
-    
+
     buh_step2:
       name: BUH Step 2
       description: Binary sensor for backup heater step 2, typical ESPHome Altherma - BUH Step2
@@ -191,14 +191,14 @@ actions:
         {% set ns = namespace(d={}) %}
         {# 'heatpump_elec': heatpump_elec, #}
         {# 'heatpump_cooling': heatpump_cooling, #}
-        {% set mapping = {          
+        {% set mapping = {
           'heatpump_flowT': heatpump_flowT,
           'heatpump_returnT': heatpump_returnT,
           'heatpump_outsideT': heatpump_outsideT,
           'heatpump_roomT': heatpump_roomT,
           'heatpump_targetT': heatpump_targetT,
           'heatpump_flowrate': heatpump_flowrate,
-          'heatpump_dhw': heatpump_dhw,          
+          'heatpump_dhw': heatpump_dhw,
           'heatpump_dhwT': heatpump_dhwT,
           'heatpump_dhwTargetT': heatpump_dhwTargetT
         } %}
@@ -235,7 +235,7 @@ actions:
           {% set immersion.power = immersion.power + (buh_step2_power | float(0)) %}
         {% endif %}
         {% set ns.d = dict(ns.d, **{'immersion_elec': immersion.power}) %}
-        
+
         {{ ns.d | tojson }}
 
   - action: rest_command.emoncms_post
