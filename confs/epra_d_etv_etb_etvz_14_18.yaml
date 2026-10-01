@@ -1,0 +1,569 @@
+# Daikin Altherma 3 H HT, EPRA D / D7 with ETV16, ETB16, ETVZ16 (E / E7), 14-18 kW.
+# Mapped from:
+# https://github.com/raomin/ESPAltherma/blob/main/include/def/Altherma(EPRA%20D_D7%20ETV16-ETB16-ETVZ16%20E_E7%20series%2014-18kW).h
+# Target units: indoor ETBX16E9W7, outdoor EPRA18DW17.
+# ETBX is the wall-mounted heating-only ETB hydrobox, so it uses this ETB16 map.
+# Offsets differ from the ERGA 04-08 kW file: 0x20 is high/low pressure (not a heat sink),
+# 0x21 is inverter and fan fin temperatures (not mains voltage), and fan steps are 0x30 offsets 1 and 2.
+
+.altherma_base: &altherma_base
+  platform: altherma_hub
+  altherma_hub_id: altherma_hub_1
+
+.temp: &temp
+  <<: *altherma_base
+  device_class: temperature
+  unit_of_measurement: °C
+  state_class: measurement
+  accuracy_decimals: 1
+
+.pressure: &pressure
+  <<: *altherma_base
+  device_class: pressure
+  unit_of_measurement: bar
+  state_class: measurement
+  accuracy_decimals: 1
+
+.current: &current
+  <<: *altherma_base
+  device_class: current
+  unit_of_measurement: A
+  state_class: measurement
+  accuracy_decimals: 1
+
+.number: &number
+  <<: *altherma_base
+  state_class: measurement
+  accuracy_decimals: 0
+
+.binary: &binary
+  <<: *altherma_base
+
+.text: &text
+  <<: *altherma_base
+
+sensor:
+  - <<: *temp
+    name: Target evap. temp.
+    register: 0x10
+    offset: 6
+    convid: 114
+    datasize: 2
+  - <<: *temp
+    name: Target cond. temp.
+    register: 0x10
+    offset: 8
+    convid: 114
+    datasize: 2
+
+  - <<: *temp
+    name: Outdoor air temp. (R1T)
+    register: 0x20
+    offset: 0
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Outdoor heat exch. temp. (R4T)
+    register: 0x20
+    offset: 2
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Discharge pipe temp. (R2T)
+    register: 0x20
+    offset: 4
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Suction pipe temp. (R3T)
+    register: 0x20
+    offset: 6
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Heat exchanger mid-temp. (R5T)
+    register: 0x20
+    offset: 8
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Liquid pipe temp. (R6T)
+    register: 0x20
+    offset: 10
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *pressure
+    name: High pressure
+    register: 0x20
+    offset: 12
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: High pressure saturation temp.
+    register: 0x20
+    offset: 12
+    convid: 405
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *pressure
+    name: Low pressure
+    register: 0x20
+    offset: 14
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Low pressure saturation temp.
+    register: 0x20
+    offset: 14
+    convid: 405
+    datasize: 2
+    entity_category: diagnostic
+
+  - <<: *current
+    name: INV primary current
+    register: 0x21
+    offset: 0
+    convid: 105
+    datasize: 2
+  - <<: *current
+    name: INV secondary current
+    register: 0x21
+    offset: 2
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: INV fin temp.
+    register: 0x21
+    offset: 4
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Fan 1 fin temp.
+    register: 0x21
+    offset: 6
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Fan 2 fin temp.
+    register: 0x21
+    offset: 8
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Compressor outlet temp.
+    register: 0x21
+    offset: 10
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+
+  - <<: *number
+    name: INV frequency
+    register: 0x30
+    offset: 0
+    convid: 152
+    datasize: 1
+    unit_of_measurement: rps
+  - <<: *number
+    name: Fan 1
+    register: 0x30
+    offset: 1
+    convid: 211
+    datasize: 1
+    unit_of_measurement: step
+  - <<: *number
+    name: Fan 2
+    register: 0x30
+    offset: 2
+    convid: 211
+    datasize: 1
+    unit_of_measurement: step
+  - <<: *number
+    name: Expansion valve 1
+    register: 0x30
+    offset: 3
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    entity_category: diagnostic
+  - <<: *number
+    name: Expansion valve 2
+    register: 0x30
+    offset: 5
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    entity_category: diagnostic
+  - <<: *number
+    name: Expansion valve 3
+    register: 0x30
+    offset: 7
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    entity_category: diagnostic
+  - <<: *number
+    name: Expansion valve 4
+    register: 0x30
+    offset: 9
+    convid: 151
+    datasize: 2
+    unit_of_measurement: pls
+    entity_category: diagnostic
+
+  - <<: *temp
+    name: DHW setpoint
+    register: 0x60
+    offset: 7
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: LW setpoint (main)
+    register: 0x60
+    offset: 9
+    convid: 105
+    datasize: 2
+
+  - <<: *temp
+    name: Leaving water temp. before BUH (R1T)
+    register: 0x61
+    offset: 2
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Leaving water temp. after BUH (R2T)
+    register: 0x61
+    offset: 4
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Refrig. temp. liquid side (R3T)
+    register: 0x61
+    offset: 6
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+  - <<: *temp
+    name: Inlet water temp. (R4T)
+    register: 0x61
+    offset: 8
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: DHW tank temp. (R5T)
+    register: 0x61
+    offset: 10
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Indoor ambient temp. (R1T)
+    register: 0x61
+    offset: 12
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: Ext. indoor ambient sensor (R6T)
+    register: 0x61
+    offset: 14
+    convid: 105
+    datasize: 2
+
+  - <<: *temp
+    name: LW setpoint (add)
+    register: 0x62
+    offset: 3
+    convid: 105
+    datasize: 2
+  - <<: *temp
+    name: RT setpoint
+    register: 0x62
+    offset: 5
+    convid: 105
+    datasize: 2
+  - <<: *altherma_base
+    name: Flow
+    register: 0x62
+    offset: 9
+    convid: 105
+    datasize: 2
+    unit_of_measurement: l/min
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:waves-arrow-right
+  - <<: *pressure
+    name: Water pressure
+    register: 0x62
+    offset: 11
+    convid: 105
+    datasize: 1
+  - <<: *number
+    name: "Water pump signal (0:max-100:stop)"
+    register: 0x62
+    offset: 12
+    convid: 152
+    datasize: 1
+  - <<: *pressure
+    name: Refrigerant pressure
+    register: 0x62
+    offset: 15
+    convid: 105
+    datasize: 2
+    entity_category: diagnostic
+
+  - <<: *number
+    name: BUH output capacity
+    register: 0x63
+    offset: 13
+    convid: 152
+    datasize: 1
+  # Optional CT clamps. 0x63 offset 16 is also listed as "HP Forced FG" (convid 307);
+  # that bit decoding conflicts with the L3 current value, so only the current is mapped.
+  - <<: *current
+    name: CT sensor L1
+    register: 0x63
+    offset: 14
+    convid: 161
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *current
+    name: CT sensor L2
+    register: 0x63
+    offset: 15
+    convid: 161
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *current
+    name: CT sensor L3
+    register: 0x63
+    offset: 16
+    convid: 161
+    datasize: 1
+    entity_category: diagnostic
+
+  - <<: *temp
+    name: Outlet water heat exch. temp. (DLWB2)
+    register: 0x65
+    offset: 2
+    convid: 105
+    datasize: 2
+
+binary_sensor:
+  - <<: *binary
+    name: Outdoor thermostat
+    device_class: running
+    register: 0x10
+    offset: 1
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Defrost operation
+    register: 0x10
+    offset: 1
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Oil return operation
+    register: 0x10
+    offset: 1
+    convid: 303
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *binary
+    name: Low noise control
+    register: 0x10
+    offset: 1
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: 4 way valve
+    register: 0x30
+    offset: 11
+    convid: 307
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *binary
+    name: Crank case heater
+    register: 0x30
+    offset: 12
+    convid: 307
+    datasize: 1
+    entity_category: diagnostic
+
+  - <<: *binary
+    name: Thermostat
+    device_class: running
+    register: 0x60
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Freeze protection
+    device_class: cold
+    register: 0x60
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Silent mode
+    register: 0x60
+    offset: 2
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Freeze protection for water piping
+    device_class: cold
+    register: 0x60
+    offset: 2
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: Water flow switch
+    register: 0x60
+    offset: 11
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Thermal protector BUH (Q1L)
+    device_class: problem
+    register: 0x60
+    offset: 11
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: Thermal protector BSH
+    device_class: problem
+    register: 0x60
+    offset: 11
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: Bivalent operation
+    register: 0x60
+    offset: 11
+    convid: 300
+    datasize: 1
+  - <<: *binary
+    name: "2way valve (On:Heat Off:Cool)"
+    register: 0x60
+    offset: 12
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: "3way valve (On:DHW Off:Space)"
+    register: 0x60
+    offset: 12
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: BSH
+    device_class: heat
+    register: 0x60
+    offset: 12
+    convid: 305
+    datasize: 1
+  - <<: *binary
+    name: BUH step 1
+    device_class: heat
+    register: 0x60
+    offset: 12
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: BUH step 2
+    device_class: heat
+    register: 0x60
+    offset: 12
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Water pump operation
+    device_class: running
+    register: 0x60
+    offset: 12
+    convid: 301
+    datasize: 1
+
+  - <<: *binary
+    name: Powerful DHW operation
+    register: 0x62
+    offset: 2
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Space heating operation
+    device_class: heat
+    register: 0x62
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: System off
+    register: 0x62
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Emergency active
+    device_class: problem
+    register: 0x62
+    offset: 2
+    convid: 300
+    datasize: 1
+
+text_sensor:
+  - <<: *text
+    name: Operation mode
+    icon: mdi:heat-pump
+    register: 0x10
+    offset: 0
+    convid: 217
+    datasize: 1
+  - <<: *text
+    name: Outdoor error type
+    register: 0x10
+    offset: 4
+    convid: 203
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *text
+    name: Outdoor error code
+    register: 0x10
+    offset: 5
+    convid: 204
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *text
+    name: Indoor operation mode
+    icon: mdi:state-machine
+    register: 0x60
+    offset: 2
+    convid: 315
+    datasize: 1
+  - <<: *text
+    name: Error code
+    register: 0x60
+    offset: 3
+    convid: 204
+    datasize: 1
+  - <<: *text
+    name: Error detailed code
+    register: 0x60
+    offset: 4
+    convid: 152
+    datasize: 1
+    entity_category: diagnostic
+  - <<: *text
+    name: Error type
+    register: 0x60
+    offset: 5
+    convid: 203
+    datasize: 1
+    entity_category: diagnostic
