@@ -131,6 +131,7 @@ The easiest way to get started - no tools to install.
 1. Open https://jjohnsen.github.io/esphome-altherma/ and click **Connect**
 
    ![Browser install step 1 - connect dialog](img/browser-install-1.png)
+
 2. Follow the guided process to:
    - Flash the firmware
    - Connect to Wi-Fi
@@ -307,7 +308,7 @@ This project vendors selected files from [ESPAltherma](https://github.com/raomin
 
 ```bash
 # Add ESPAltherma as a remote (one-time setup)
-git remote add espaltherma https://github.com/raomin/ESPAltherma.git
+git remote add espaltherma [https://github.com/raomin/ESPAltherma.git](https://github.com/raomin/ESPAltherma.git)
 
 git fetch espaltherma
 git checkout espaltherma/main -- include/converters.h
