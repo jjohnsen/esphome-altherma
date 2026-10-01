@@ -14,7 +14,6 @@ M5Stack Basic running ESPHome Altherma
 ![Home Assistant dashboard with real-time Altherma data](img/home-assistant-dashboard-sensors.png)  
 ESPHome Altherma with real-time data in Home Assistant
 
-
 ![My Heatpump dashboard in Home Assistant](img/home-assistant-emoncms-myheatpump-dashboard.png)  
 ESPHome Altherma + Emoncms and My Heatpump App
 
@@ -27,12 +26,12 @@ ESPHome Altherma + Emoncms and My Heatpump App
 
 No command line needed. See [Installation](#installation) for more options.
 
-
 ## Features
 
 - **Real-time sensor data** - temperatures, voltages, currents, flow rates, pressures, fan speeds, and more
 - **Model-specific configuration** via modular YAML files for different Altherma units
-- **Multiple board support** - ESP8266, ESP32, ESP32-S3, and M5Stack AtomS3 Lite
+- **Multiple board support** - ESP8266, ESP32, ESP32-S3, M5Stack Core / Basic, and M5Stack AtomS3 Lite
+- **Interactive on-device UI (M5Stack Core)** - button navigation, bold high-contrast fonts, and dynamic Dark/Light theme switching
 - **Browser-based installation** via [ESP Web Tools](https://esphome.github.io/esp-web-tools/) (no command line needed)
 - **OTA updates** with automatic update checking via GitHub releases
 - **Mock UART mode** for development and testing without hardware
@@ -44,43 +43,77 @@ No command line needed. See [Installation](#installation) for more options.
 | [ESP8266 D1 Mini](https://docs.wemos.cc/en/latest/d1/d1_mini.html) | `esphome-altherma-esp8266.yaml` | GPIO 5 | GPIO 4 |
 | [ESP32 DevKit](https://www.espboards.dev/esp32/esp32doit-devkit-v1/) | `esphome-altherma-esp32.yaml` | GPIO 16 | GPIO 17 |
 | [ESP32-S3 DevKit](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/) | `esphome-altherma-esp32-s3.yaml` | GPIO 2 | GPIO 1 |
+| [M5Stack Core / Basic](https://docs.m5stack.com/en/core/basic) | `esphome-altherma-m5stack.yaml` | GPIO 16 | GPIO 17 |
 | [M5Stack AtomS3 Lite](https://docs.m5stack.com/en/core/AtomS3%20Lite) | `esphome-altherma-atoms3.yaml` | GPIO 2 (G1) | GPIO 1 (G2) |
 
 ## Hardware Requirements
 
-* ESP8266 or ESP32 development board
-* Daikin Altherma heat pump with X10A connector
-* 5-pin JST EH 2.5 mm connector or 4 Dupont M-F wires
+- ESP8266, ESP32, or M5Stack development board
+- Daikin Altherma heat pump with X10A connector
+- 5-pin JST EH 2.5 mm connector or 4 Dupont M-F wires
+- *(Optional)* 5V Active-Low relay module for physical contact control (Thermostat / Smart Grid)
 
 ### Wiring
 
-Connect the ESP32 to the Altherma unit using the X10A connector:
+Connect the ESP32 / M5Stack to the Altherma unit using the X10A connector:
 
-| X10A Pin | Signal | ESP32 DevKit | M5Stack AtomS3 Lite / ESP32-S3 |
-| -- | -- | -- | -- |
-| 1 | 5V | 5V / VIN | 5V |
-| 2 | TX (pump → ESP) | RX pin (GPIO 16) | RX pin (GPIO 2) |
-| 3 | RX (ESP → pump) | TX pin (GPIO 17) | TX pin (GPIO 1) |
-| 4 | NC | Not connected | Not connected |
-| 5 | GND | GND | GND |
+| X10A Pin | Signal | ESP32 DevKit | M5Stack Core / Basic | M5Stack AtomS3 Lite / ESP32-S3 |
+| -- | -- | -- | -- | -- |
+| 1 | 5V | 5V / VIN | 5V | 5V |
+| 2 | TX (pump → ESP) | RX pin (GPIO 16) | RX pin (GPIO 16) | RX pin (GPIO 2) |
+| 3 | RX (ESP → pump) | TX pin (GPIO 17) | TX pin (GPIO 17) | TX pin (GPIO 1) |
+| 4 | NC | Not connected | Not connected | Not connected |
+| 5 | GND | GND | GND | GND |
 
 > **Note:** The heat pump's TX connects to the ESP's RX, and vice versa (crossover).
 
 Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?tab=readme-ov-file#daikin-altherma-4-pin-x10a-connection) for additional details and photos.
 
+### Optional: External Relays (Thermostat & Smart Grid SG1)
+
+If you wish to control dry contacts on your heat pump (such as external thermostat demand or Smart Grid 1 photovoltaic boost), you can connect external relay modules to available GPIOs:
+
+| Function | ESP32 DevKit Pin | M5Stack Core Pin | Notes |
+| -- | -- | -- | -- |
+| **Thermostat Demand** | GPIO 22 | GPIO 22 | Active-Low / Inverted logic typically required |
+| **Smart Grid 1 (SG1)** | GPIO 21 | GPIO 21 | Active-Low / Inverted logic typically required |
+
+Example configuration snippet to append to your YAML:
+
+```yaml
+switch:
+  - platform: gpio
+    pin:
+      number: GPIO22
+      inverted: true
+    name: "Altherma Thermostat"
+    id: relay_thermo
+    icon: "mdi:radiator"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  - platform: gpio
+    pin:
+      number: GPIO21
+      inverted: true
+    name: "Altherma Smart Grid 1 (SG1)"
+    id: relay_sg1
+    icon: "mdi:solar-power"
+    restore_mode: RESTORE_DEFAULT_OFF
+```
+
 ## Successful Installs
 
-| Board                  | Heat Pump                                | User      | Additional info
-| --                     | --                                       | --        | --
-| Generic esp32dev board | ERGA08DAV3 / EHVH08S23DA6V               | @jjohnsen | This repo ;)
-| M5-Stack Basic         | ERGA08DAV3 / EHVH08S23DA6V               | @jjohnsen | This repo ;)
-| M5Stack AtomS3 Lite    | DAIKIN Altherma 3 R Ech2o / EHSXB08P30EF | @maromme  | https://github.com/jjohnsen/esphome-altherma/discussions/4
-| DOIT ESP32 DEVKIT V1   | EHVX08S26CB9W                            | @MaBeniu  | https://github.com/jjohnsen/esphome-altherma/discussions/5
-| esp32dev | ERLQ011CAV3 / EHBX11CB9W || [Detailed setup guide in French](https://domo.rem81.com/index.php/2026/01/12/ha-monitoring-de-ma-pac-daikin-altherma-avec-esphome-esphome-altherma-alternative-a-espaltherma/)
-| ESP32-C6-WROOM-1       | EHBH16C9W                         | @AndriesMuylaert | Includes relay + onboard sensors - https://github.com/jjohnsen/esphome-altherma/discussions/11
-| Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13
-| ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25
-| ESP32-S3 DevKit        | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41
+| Board | Heat Pump | User | Additional info |
+| -- | -- | -- | -- |
+| Generic esp32dev board | ERGA08DAV3 / EHVH08S23DA6V | @jjohnsen | This repo ;) |
+| M5-Stack Basic | ERGA08DAV3 / EHVH08S23DA6V | @jjohnsen | This repo ;) |
+| M5Stack AtomS3 Lite | DAIKIN Altherma 3 R Ech2o / EHSXB08P30EF | @maromme | https://github.com/jjohnsen/esphome-altherma/discussions/4 |
+| DOIT ESP32 DEVKIT V1 | EHVX08S26CB9W | @MaBeniu | https://github.com/jjohnsen/esphome-altherma/discussions/5 |
+| esp32dev | ERLQ011CAV3 / EHBX11CB9W | | [Detailed setup guide in French](https://domo.rem81.com/index.php/2026/01/12/ha-monitoring-de-ma-pac-daikin-altherma-avec-esphome-esphome-altherma-alternative-a-espaltherma/) |
+| ESP32-C6-WROOM-1 | EHBH16C9W | @AndriesMuylaert | Includes relay + onboard sensors - https://github.com/jjohnsen/esphome-altherma/discussions/11 |
+| Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13 |
+| ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25 |
+| ESP32-S3 DevKit | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41 |
 
 ## Installation
 
@@ -96,11 +129,13 @@ Refer to the [ESPAltherma wiring guide](https://github.com/raomin/ESPAltherma?ta
 The easiest way to get started - no tools to install.
 
 1. Open https://jjohnsen.github.io/esphome-altherma/ and click **Connect**
+
    ![Browser install step 1 - connect dialog](img/browser-install-1.png)
 2. Follow the guided process to:
    - Flash the firmware
    - Connect to Wi-Fi
    - Add the device to Home Assistant
+   
    ![Browser install step 2 - device discovered](img/browser-install-2.png)
 
 OTA Updates are available within Home Assistant:
@@ -112,7 +147,7 @@ OTA Updates are available within Home Assistant:
 1. [Install ESPHome](https://esphome.io/guides/getting_started_command_line/)
 2. Clone this repository:
    ```sh
-   git clone https://github.com/jjohnsen/esphome-altherma.git
+   git clone [https://github.com/jjohnsen/esphome-altherma.git](https://github.com/jjohnsen/esphome-altherma.git)
    cd esphome-altherma
    ```
 3. Configure Wi-Fi credentials in `secrets.yaml`:
@@ -156,6 +191,7 @@ Choose the YAML file matching your board:
 - `esphome-altherma-esp32.yaml` - Generic ESP32
 - `esphome-altherma-esp32-s3.yaml` - ESP32-S3 DevKit
 - `esphome-altherma-esp8266.yaml` - Generic ESP8266
+- `esphome-altherma-m5stack.yaml` - M5Stack Core / Basic (includes display UI, button controls, and Dark/Light theme switch)
 - `esphome-altherma-atoms3.yaml` - M5Stack AtomS3 Lite
 
 Each includes `base.yaml` (shared component setup) and the model config from `confs/`.
@@ -163,7 +199,7 @@ Each includes `base.yaml` (shared component setup) and the model config from `co
 ## Guides
 
 - **[ESPHome Altherma + Emoncms Setup Guide](https://jjohnsen.no/2026/esphome-altherma-emoncms-setup-guide/)**  
-   Long-term heat pump performance monitoring with the MyHeatpump dashboard in Home Assistant. Covers Emoncms installation, input/feed setup, and COP tracking.
+  Long-term heat pump performance monitoring with the MyHeatpump dashboard in Home Assistant. Covers Emoncms installation, input/feed setup, and COP tracking.
 
 ## Register Discovery (Experimental)
 
@@ -191,10 +227,10 @@ The result is published to the **Manual Query Registry Result** text sensor and 
 ```yaml
 action: esphome.esphome_altherma_query_register
 data:
-   register: "0x60"
-   offset: 11
-   convid: 105
-   datasize: 1
+  register: "0x60"
+  offset: 11
+  convid: 105
+  datasize: 1
 ```
 
 ### Interpreting the result
@@ -237,6 +273,7 @@ This provides simulated register responses so you can test the component logic w
 base.yaml                          # Shared ESPHome config (logger, API, OTA, UART, hub)
 esphome-altherma-esp32.yaml        # Board config: ESP32 DevKit
 esphome-altherma-esp32-s3.yaml     # Board config: ESP32-S3
+esphome-altherma-m5stack.yaml      # Board config: M5Stack Core / Basic
 esphome-altherma-atoms3.yaml       # Board config: M5Stack AtomS3 Lite
 confs/
   erga_eh_da_04_08.yaml            # Sensor definitions for ERGA-D series

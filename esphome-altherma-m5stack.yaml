@@ -52,6 +52,27 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  - id: dark_mode
+    type: bool
+    restore_value: yes
+    initial_value: 'true'
+
+# Switch para controlar o modo escuro (aparece no menu do ecrã, no Web Server e no Home Assistant)
+switch:
+  - platform: template
+    name: "M5 Dark Mode"
+    id: m5_dark_mode_switch
+    icon: "mdi:theme-light-dark"
+    lambda: |-
+      return id(dark_mode);
+    turn_on_action:
+      - lambda: |-
+          id(dark_mode) = true;
+      - component.update: m5_display
+    turn_off_action:
+      - lambda: |-
+          id(dark_mode) = false;
+      - component.update: m5_display
 
 # Backlight control
 output:
@@ -89,6 +110,7 @@ script:
           for (auto *s : App.get_sensors())        { if (!s->is_internal()) item_count++; }
           for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) item_count++; }
           for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_switches())       { if (!s->is_internal()) item_count++; }
           if (item_count <= 0) { id(ui_selected_index) = 0; return; }
           id(ui_selected_index) = (id(ui_selected_index) - 1 + item_count) % item_count;
       - component.update: m5_display
@@ -100,6 +122,7 @@ script:
           for (auto *s : App.get_sensors())        { if (!s->is_internal()) item_count++; }
           for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) item_count++; }
           for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) item_count++; }
+          for (auto *s : App.get_switches())       { if (!s->is_internal()) item_count++; }
           if (item_count <= 0) { id(ui_selected_index) = 0; return; }
           id(ui_selected_index) = (id(ui_selected_index) + 1) % item_count;
       - component.update: m5_display
@@ -107,6 +130,34 @@ script:
   - id: ui_toggle_detail
     then:
       - lambda: |-
+          // Constroi lista unificada com os mesmos tipos
+          struct Entry { void *ptr; uint8_t type; };
+          std::vector<Entry> items;
+          items.reserve(64);
+          for (auto *s : App.get_sensors())        { if (!s->is_internal()) items.push_back({s, 0}); }
+          for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) items.push_back({s, 1}); }
+          for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) items.push_back({s, 2}); }
+          for (auto *s : App.get_switches())       { if (!s->is_internal()) items.push_back({s, 3}); }
+
+          auto entry_name = [](const Entry &e) -> const char * {
+            if (e.type == 0) return static_cast<sensor::Sensor *>(e.ptr)->get_name().c_str();
+            if (e.type == 1) return static_cast<text_sensor::TextSensor *>(e.ptr)->get_name().c_str();
+            if (e.type == 2) return static_cast<binary_sensor::BinarySensor *>(e.ptr)->get_name().c_str();
+            return static_cast<switch_::Switch *>(e.ptr)->get_name().c_str();
+          };
+          std::sort(items.begin(), items.end(), [&entry_name](const Entry &a, const Entry &b) {
+            return strcmp(entry_name(a), entry_name(b)) < 0;
+          });
+
+          if (!items.empty()) {
+            int selected = (id(ui_selected_index) % items.size() + items.size()) % items.size();
+            // Se o item selecionado for um switch (como o Dark Mode), comuta logo o estado!
+            if (items[selected].type == 3) {
+              static_cast<switch_::Switch *>(items[selected].ptr)->toggle();
+              return;
+            }
+          }
+          // Para os restantes sensores, abre o detalhe normal
           id(ui_detail_mode) = !id(ui_detail_mode);
       - component.update: m5_display
 
@@ -148,17 +199,17 @@ binary_sensor:
     internal: true
 
 font:
-  - file: "gfonts://Roboto"
+  - file: "gfonts://Roboto@700"
     id: font_small
     size: 16
     extras:
-      - file: "gfonts://Roboto"
+      - file: "gfonts://Roboto@700"
         glyphs: ["⁄", "●"]
-  - file: "gfonts://Roboto"
+  - file: "gfonts://Roboto@700"
     id: font_large
     size: 28
     extras:
-      - file: "gfonts://Roboto"
+      - file: "gfonts://Roboto@700"
         glyphs: ["⁄"]
 
 spi:
@@ -187,59 +238,73 @@ display:
     id: m5_display
     model: M5CORE
     rotation: 0
+    invert_colors: true
     lambda: |-
-      // Header bar with WiFi signal indicator
-      it.filled_rectangle(0, 0, 320, 28, Color(0x40, 0x40, 0x40));
-      it.printf(8, 6, id(font_small), Color::WHITE, "%s", App.get_name().c_str());
+      bool dark = id(dark_mode);
 
-      // WiFi signal indicator (upper right)
+      // Paleta dinamica
+      Color bg_color       = dark ? Color::BLACK : Color::WHITE;
+      Color header_bg      = dark ? Color(0x18, 0x18, 0x18) : Color(0xE0, 0xE0, 0xE0);
+      Color header_title   = dark ? Color(0xFF, 0xCC, 0x00) : Color(0x00, 0x55, 0xAA);
+      Color text_default   = dark ? Color::WHITE : Color::BLACK;
+      Color text_highlight = dark ? Color(0xFF, 0xEB, 0x3B) : Color(0x00, 0x66, 0xCC);
+      Color detail_label   = dark ? Color(0x64, 0xB5, 0xF6) : Color(0x00, 0x77, 0x99);
+      Color hint_color     = dark ? Color(0x80, 0x80, 0x80) : Color(0x66, 0x66, 0x66);
+
+      // Fundo
+      it.fill(bg_color);
+
+      // Header bar
+      it.filled_rectangle(0, 0, 320, 26, header_bg);
+      it.printf(8, 5, id(font_small), header_title, "%s", App.get_name().c_str());
+
+      // WiFi signal indicator
       if (id(wifi_signal_sensor).has_state()) {
         int rssi = (int)id(wifi_signal_sensor).state;
         const char *wifi_label = "WiFi";
-        Color wifi_color = Color::WHITE;
+        Color wifi_color = text_default;
         if (rssi > -60) {
           wifi_label = "WiFi●●●";
-          wifi_color = Color(0x4C, 0xAF, 0x50);  // green
+          wifi_color = dark ? Color(0x4C, 0xAF, 0x50) : Color(0x2E, 0x7D, 0x32);
         } else if (rssi > -80) {
           wifi_label = "WiFi● ●";
-          wifi_color = Color(0xFF, 0x9C, 0x00);  // orange
+          wifi_color = dark ? Color(0xFF, 0x9C, 0x00) : Color(0xEF, 0x6C, 0x00);
         } else {
           wifi_label = "WiFi●";
-          wifi_color = Color(0xF4, 0x43, 0x36);  // red
+          wifi_color = dark ? Color(0xF4, 0x43, 0x36) : Color(0xC6, 0x28, 0x28);
         }
-        it.printf(216, 6, id(font_small), wifi_color, "%s", wifi_label);
+        it.printf(216, 5, id(font_small), wifi_color, "%s", wifi_label);
       } else {
-        it.printf(236, 6, id(font_small), Color::WHITE, "WiFi?");
+        it.printf(236, 5, id(font_small), text_default, "WiFi?");
       }
 
-      // Build unified sorted list: type 0=sensor, 1=text_sensor, 2=binary_sensor
+      // Build unified sorted list: 0=sensor, 1=text_sensor, 2=binary_sensor, 3=switch
       struct Entry { void *ptr; uint8_t type; };
       std::vector<Entry> items;
       items.reserve(64);
       for (auto *s : App.get_sensors())        { if (!s->is_internal()) items.push_back({s, 0}); }
       for (auto *s : App.get_text_sensors())   { if (!s->is_internal()) items.push_back({s, 1}); }
       for (auto *s : App.get_binary_sensors()) { if (!s->is_internal()) items.push_back({s, 2}); }
+      for (auto *s : App.get_switches())       { if (!s->is_internal()) items.push_back({s, 3}); }
 
       auto entry_name = [](const Entry &e) -> const char * {
         if (e.type == 0) return static_cast<sensor::Sensor *>(e.ptr)->get_name().c_str();
         if (e.type == 1) return static_cast<text_sensor::TextSensor *>(e.ptr)->get_name().c_str();
-        return static_cast<binary_sensor::BinarySensor *>(e.ptr)->get_name().c_str();
+        if (e.type == 2) return static_cast<binary_sensor::BinarySensor *>(e.ptr)->get_name().c_str();
+        return static_cast<switch_::Switch *>(e.ptr)->get_name().c_str();
       };
       std::sort(items.begin(), items.end(), [&entry_name](const Entry &a, const Entry &b) {
         return strcmp(entry_name(a), entry_name(b)) < 0;
       });
 
       const int item_count = static_cast<int>(items.size());
-
-      if (item_count <= 0) {
-        return;
-      }
+      if (item_count <= 0) return;
 
       const int selected = (id(ui_selected_index) % item_count + item_count) % item_count;
       const int first_visible = (selected / 6) * 6;
 
       auto render_row = [&](const Entry &e, int y, bool active) {
-        const Color fg = active ? Color(0xFF, 0xEB, 0x3B) : Color::WHITE;
+        const Color fg = active ? text_highlight : text_default;
         const char *pfx = active ? ">" : " ";
         const char *name = entry_name(e);
         if (e.type == 0) {
@@ -257,17 +322,20 @@ display:
             it.printf(6, y, id(font_small), fg, "%s %s: %s", pfx, name, s->state.c_str());
           else
             it.printf(6, y, id(font_small), fg, "%s %s: --", pfx, name);
-        } else {
+        } else if (e.type == 2) {
           auto *s = static_cast<binary_sensor::BinarySensor *>(e.ptr);
           if (s->has_state())
             it.printf(6, y, id(font_small), fg, "%s %s: %s", pfx, name, s->state ? "ON" : "OFF");
           else
             it.printf(6, y, id(font_small), fg, "%s %s: --", pfx, name);
+        } else {
+          auto *s = static_cast<switch_::Switch *>(e.ptr);
+          it.printf(6, y, id(font_small), fg, "%s %s: %s", pfx, name, s->state ? "ON" : "OFF");
         }
       };
 
       if (!id(ui_detail_mode)) {
-        int line_y = 36;
+        int line_y = 34;
         for (int i = first_visible; i < std::min(first_visible + 6, item_count); i++) {
           render_row(items[i], line_y, i == selected);
           line_y += 32;
@@ -275,8 +343,8 @@ display:
       } else {
         const Entry &e = items[selected];
         const char *name = entry_name(e);
-        it.printf(10, 40, id(font_small), Color(0xA5, 0xD6, 0xA7), "Selected sensor:");
-        it.printf(10, 66, id(font_small), "%s", name);
+        it.printf(10, 38, id(font_small), detail_label, "Selected item:");
+        it.printf(10, 64, id(font_small), text_default, "%s", name);
 
         if (e.type == 0) {
           auto *s = static_cast<sensor::Sensor *>(e.ptr);
@@ -284,17 +352,20 @@ display:
           const auto uref = s->get_unit_of_measurement_ref();
           const char *unit = uref.empty() ? "" : uref.c_str();
           if (s->has_state()) {
-            it.printf(10, 108, id(font_large), "%.*f", dec, s->state);
-            it.printf(10, 150, id(font_small), "%s", unit);
+            it.printf(10, 106, id(font_large), text_highlight, "%.*f", dec, s->state);
+            it.printf(10, 148, id(font_small), text_default, "%s", unit);
           } else {
-            it.printf(10, 108, id(font_large), "--");
+            it.printf(10, 106, id(font_large), text_default, "--");
           }
         } else if (e.type == 1) {
           auto *s = static_cast<text_sensor::TextSensor *>(e.ptr);
-          it.printf(10, 108, id(font_small), "%s", s->has_state() ? s->state.c_str() : "--");
-        } else {
+          it.printf(10, 106, id(font_small), text_default, "%s", s->has_state() ? s->state.c_str() : "--");
+        } else if (e.type == 2) {
           auto *s = static_cast<binary_sensor::BinarySensor *>(e.ptr);
-          it.printf(10, 108, id(font_large), "%s", s->has_state() ? (s->state ? "ON" : "OFF") : "--");
+          it.printf(10, 106, id(font_large), text_default, "%s", s->has_state() ? (s->state ? "ON" : "OFF") : "--");
+        } else {
+          auto *s = static_cast<switch_::Switch *>(e.ptr);
+          it.printf(10, 106, id(font_large), text_highlight, "%s", s->state ? "ON" : "OFF");
         }
-        it.printf(10, 206, id(font_small), Color(0xCF, 0xD8, 0xDC), "C = back to list");
+        it.printf(10, 206, id(font_small), hint_color, "Press C to toggle / return");
       }
