@@ -114,6 +114,7 @@ switch:
 | Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13 |
 | ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25 |
 | ESP32-S3 DevKit | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41 |
+| DOIT ESP32 DevKit V1 | ETBX16E9W7 / EPRA18DW17 | @kepten | Altherma 3 H HT, confirmed with `epra_d_etv_etb_etvz_14_18.yaml` |
 
 ## Installation
 
