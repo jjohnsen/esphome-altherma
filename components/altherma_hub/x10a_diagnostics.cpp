@@ -19,6 +19,7 @@ bool AlthermaHub::reserve_diagnostic_(DiagnosticKind kind) {
   }
   diagnostic_kind_ = kind;
   diagnostic_received_ = 0;
+  identification_sequence_active_ = false;
   diagnostic_pending_ = true;
   return true;
 }
@@ -26,6 +27,27 @@ bool AlthermaHub::reserve_diagnostic_(DiagnosticKind kind) {
 void AlthermaHub::queue_software_id() {
   if (enable_memory_diagnostics_ && reserve_diagnostic_(DiagnosticKind::SOFTWARE_ID))
     publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO, "X10A software ID read queued");
+}
+
+void AlthermaHub::queue_micon_id() {
+  if (!enable_memory_diagnostics_) {
+    publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_WARN, "X10A identity diagnostics disabled");
+    return;
+  }
+  if (reserve_diagnostic_(DiagnosticKind::MICON_ID))
+    publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO, "X10A Micon ID read queued (Daikin V command)");
+}
+
+void AlthermaHub::queue_identify_controller() {
+  if (!enable_memory_diagnostics_) {
+    publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_WARN, "X10A identity diagnostics disabled");
+    return;
+  }
+  if (reserve_diagnostic_(DiagnosticKind::SOFTWARE_ID)) {
+    identification_sequence_active_ = true;
+    publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO,
+                                  "X10A identification queued (software ID then Micon ID)");
+  }
 }
 
 void AlthermaHub::queue_read_memory(std::string space, std::string address, int32_t length) {
@@ -75,6 +97,7 @@ void AlthermaHub::queue_field_setting(std::string code) {
 
 void AlthermaHub::finish_diagnostic_() {
   diagnostic_active_ = false;
+  identification_sequence_active_ = false;
   diagnostic_kind_ = DiagnosticKind::NONE;
   poll_active_ = false;
   query_state_ = QueryState::IDLE;
@@ -93,6 +116,12 @@ void AlthermaHub::start_diagnostic_query_() {
     case DiagnosticKind::SOFTWARE_ID:
       cmd = 0x4C;
       diagnostic_expected_total_ = 6;
+      break;
+    case DiagnosticKind::MICON_ID:
+      // Daikin Configurator's auto-detect V command:
+      // request 02 56 A7; response 56 <id_lo> <id_hi> <checksum>.
+      cmd = 0x56;
+      diagnostic_expected_total_ = 4;
       break;
     case DiagnosticKind::RAM:
     case DiagnosticKind::MEMORY: {
@@ -183,8 +212,35 @@ void AlthermaHub::read_diagnostic_response_() {
       return;
     }
     if (diagnostic_kind_ == DiagnosticKind::SOFTWARE_ID) {
-      publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO, "X10A hydro software ID=%02X%02X%02X%02X",
-                                    rx_buffer_[4], rx_buffer_[3], rx_buffer_[2], rx_buffer_[1]);
+      char software_id[9] = {};
+      std::snprintf(software_id, sizeof(software_id), "%02X%02X%02X%02X",
+                    rx_buffer_[4], rx_buffer_[3], rx_buffer_[2], rx_buffer_[1]);
+      if (software_id_text_sensor_ != nullptr)
+        software_id_text_sensor_->publish_state(software_id);
+      publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO, "X10A hydro software ID=%s", software_id);
+
+      if (identification_sequence_active_) {
+        // Continue one-shot identification without releasing the UART poll lock.
+        diagnostic_kind_ = DiagnosticKind::MICON_ID;
+        rx_len_ = 0;
+        query_state_ = QueryState::SEND_QUERY;
+        return;
+      }
+      finish_diagnostic_();
+      return;
+    }
+    if (diagnostic_kind_ == DiagnosticKind::MICON_ID) {
+      uint16_t micon_id = 0;
+      if (!x10a::decode_micon_id(rx_buffer_, rx_len_, micon_id)) {
+        publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR, "X10A Micon ID invalid reply");
+        finish_diagnostic_();
+        return;
+      }
+      char micon_name[7] = {};
+      std::snprintf(micon_name, sizeof(micon_name), "ID%04X", micon_id);
+      if (micon_id_text_sensor_ != nullptr)
+        micon_id_text_sensor_->publish_state(micon_name);
+      publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_INFO, "X10A hydro Micon ID=%s", micon_name);
       finish_diagnostic_();
       return;
     }
