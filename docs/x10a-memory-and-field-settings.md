@@ -164,6 +164,16 @@ reading `0x0116` (278) and `0x0176` (374), which ESPAltherma
 actual `[5.B]` and `[2.4]` modes. Their meaning on `17014001` is
 **not yet verified**. Avoid full memory sweeps.
 
+**Experimental field-setting protocol test:** Home Assistant's live diagnostic
+text sensor reported `X10A cmd 0x21 NACK (15 EA)` at 2026-10-14 23:09:56
+Europe/Oslo, after the four successful direct-memory reads. This confirms
+that one `0x21`-family request was **rejected** on the `17014001` unit.
+The field code used is not preserved in the sensor's final state; consult
+ESPHome's `X10A field [...] queued` log line before attributing the NACK to
+a particular code. Do **not** infer that every field-setting page is
+unsupported from one failed attempt. Stop/review the protocol framing
+rather than blindly repeating requests. Normal `0x49` memory reads work.
+
 Do not add software ID `17014001` to any **write-control**
 allowlist from these observations. The proposed field-setting command
 `0x21/0x49` is **still unverified**; the successful reads above all used
