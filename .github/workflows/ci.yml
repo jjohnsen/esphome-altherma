@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '*.yaml'
+      - 'components/**'
+      - 'tests/**'
       - '.github/workflows/ci.yml'
 
   workflow_dispatch:
@@ -13,6 +15,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  x10a-unit-tests:
+    name: X10A read-only protocol tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compile and execute protocol tests
+        run: |
+          g++ -std=c++11 -Wall -Wextra -Werror -pedantic tests/test_x10a_read_protocol.cpp -o /tmp/test_x10a_read_protocol
+          /tmp/test_x10a_read_protocol
+
   ci:
     name: Building ${{ matrix.file }} / ${{ matrix.esphome-version }}
     runs-on: ubuntu-latest

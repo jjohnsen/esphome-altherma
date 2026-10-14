@@ -114,12 +114,25 @@ namespace esphome
       void update() override;
       void loop() override;
       void queue_manual_query(std::string registry_id, int32_t offset, int32_t convid, int32_t datasize);
+      void queue_read_memory(std::string space, std::string address, int32_t length);
+      void queue_software_id();
+      void queue_field_setting(std::string code);
+      void set_enable_memory_diagnostics(bool enabled) { this->enable_memory_diagnostics_ = enabled; }
+      void set_enable_experimental_field_settings(bool enabled) { this->enable_experimental_field_settings_ = enabled; }
 
     protected:
       enum class ManualQueryStatusLevel : uint8_t {
         INFO,
         WARN,
         ERROR,
+      };
+
+      enum class DiagnosticKind : uint8_t {
+        NONE,
+        SOFTWARE_ID,
+        RAM,
+        MEMORY,
+        FIELD_SETTING,
       };
 
       unsigned char calculate_crc(unsigned char *src, size_t len);
@@ -130,6 +143,11 @@ namespace esphome
       void read_response_();
       void handle_complete_frame_();
       void advance_register_();
+      bool reserve_diagnostic_(DiagnosticKind kind);
+      void start_diagnostic_query_();
+      void read_diagnostic_response_();
+      void report_field_setting_response_(bool partial);
+      void finish_diagnostic_();
 
       enum class QueryState : uint8_t {
         IDLE,
@@ -143,6 +161,9 @@ namespace esphome
 
       static constexpr size_t RX_BUFFER_SIZE = 64;
       static constexpr uint32_t QUERY_TIMEOUT_MS = 300;
+      static constexpr uint32_t DIAGNOSTIC_READ_TIMEOUT_MS = 500;
+      static constexpr uint32_t DIAGNOSTIC_FIELD_TIMEOUT_MS = 700;
+      static constexpr uint32_t DIAGNOSTIC_FIELD_GAP_MS = 100;
 
       QueryState query_state_{QueryState::IDLE};
       bool poll_active_{false};
@@ -163,6 +184,21 @@ namespace esphome
       int32_t manual_datasize_{0};
 
       text_sensor::TextSensor *query_result_text_sensor_{nullptr};
+
+      bool enable_memory_diagnostics_{false};
+      bool enable_experimental_field_settings_{false};
+      DiagnosticKind diagnostic_kind_{DiagnosticKind::NONE};
+      bool diagnostic_pending_{false};
+      bool diagnostic_active_{false};
+      uint8_t diagnostic_command_{0};
+      uint8_t diagnostic_page_{0};
+      uint8_t diagnostic_setting_{0};
+      uint16_t diagnostic_address_{0};
+      uint16_t diagnostic_length_{0};
+      size_t diagnostic_received_{0};
+      size_t diagnostic_expected_total_{0};
+      uint32_t diagnostic_last_byte_at_{0};
+      uint8_t diagnostic_data_[64] = {};
     };
 
   } // namespace altherma_hub

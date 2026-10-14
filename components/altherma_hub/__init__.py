@@ -19,6 +19,8 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(AlthermaHub),
             cv.Optional("query_result_text_sensor"): cv.use_id(text_sensor.TextSensor),
+            cv.Optional("enable_memory_diagnostics", default=False): cv.boolean,
+            cv.Optional("enable_experimental_field_settings", default=False): cv.boolean,
         }
     )
     .extend(cv.polling_component_schema("30s"))
@@ -34,6 +36,9 @@ async def to_code(config):
     if "query_result_text_sensor" in config:
         query_sensor = await cg.get_variable(config["query_result_text_sensor"])
         cg.add(var.set_query_result_text_sensor(query_sensor))
+
+    cg.add(var.set_enable_memory_diagnostics(config["enable_memory_diagnostics"]))
+    cg.add(var.set_enable_experimental_field_settings(config["enable_experimental_field_settings"]))
 
 
 # Shared configuration constants

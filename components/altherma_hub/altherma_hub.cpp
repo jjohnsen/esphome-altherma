@@ -49,6 +49,15 @@ void AlthermaHub::setup() {
 
   this->register_service(&AlthermaHub::queue_manual_query, "query_register",
                          {"register", "offset", "convid", "datasize"});
+
+  if (this->enable_memory_diagnostics_) {
+    this->register_service(&AlthermaHub::queue_read_memory, "read_memory",
+                           {"space", "address", "length"});
+    this->register_service(&AlthermaHub::queue_software_id, "read_software_id");
+  }
+  if (this->enable_experimental_field_settings_) {
+    this->register_service(&AlthermaHub::queue_field_setting, "read_field_setting", {"code"});
+  }
 }
 
 AlthermaHub::~AlthermaHub() {
@@ -86,20 +95,27 @@ void AlthermaHub::update() {
 }
 
 void AlthermaHub::loop() {
-  if (!this->poll_active_ && !this->manual_query_pending_) {
+  if (!this->poll_active_ && !this->manual_query_pending_ && !this->diagnostic_pending_) {
     return;
   }
 
-  if (!this->poll_active_ && this->manual_query_pending_) {
+  if (!this->poll_active_) {
     this->poll_active_ = true;
-    this->manual_query_active_ = true;
+    if (this->manual_query_pending_) {
+      this->manual_query_active_ = true;
+    } else {
+      this->diagnostic_pending_ = false;
+      this->diagnostic_active_ = true;
+    }
     this->query_state_ = QueryState::SEND_QUERY;
     this->cycle_started_at_ = millis();
   }
 
   switch (this->query_state_) {
     case QueryState::SEND_QUERY:
-      if (this->manual_query_active_) {
+      if (this->diagnostic_active_) {
+        this->start_diagnostic_query_();
+      } else if (this->manual_query_active_) {
         this->manual_query_pending_ = false;
         this->start_query_(this->manual_register_);
       } else {
@@ -107,7 +123,11 @@ void AlthermaHub::loop() {
       }
       break;
     case QueryState::READ_RESPONSE:
-      this->read_response_();
+      if (this->diagnostic_active_) {
+        this->read_diagnostic_response_();
+      } else {
+        this->read_response_();
+      }
       break;
     case QueryState::IDLE:
     default:
@@ -210,8 +230,7 @@ void AlthermaHub::start_query_(uint8_t regID) {
   auto uart = this->parent_;
 #ifdef USE_MOCK_UART
   ESP_LOGW(TAG, "Using MockUART");
-  static MockUART mock_uart;
-  uart = &mock_uart;
+  uart = &shared_mock_uart();
 #endif
 
   uint8_t command[] = {0x03, 0x40, regID, 0x00};
@@ -243,8 +262,7 @@ void AlthermaHub::start_query_(uint8_t regID) {
 void AlthermaHub::read_response_() {
   auto uart = this->parent_;
 #ifdef USE_MOCK_UART
-  static MockUART mock_uart;
-  uart = &mock_uart;
+  uart = &shared_mock_uart();
 #endif
 
   if (millis() - this->query_started_at_ > QUERY_TIMEOUT_MS) {

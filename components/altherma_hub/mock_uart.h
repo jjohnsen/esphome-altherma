@@ -15,8 +15,13 @@ namespace esphome
         {
         public:
             void write_array(const uint8_t *data, size_t len) override {
-                ESP_LOGI(TAG_MOCK, "Write: [%02x %02x %02x %02x]", data[0], data[1], data[2], data[3]);
-                generate_response(data[2]);
+                if (len < 3) return;
+                ESP_LOGI(TAG_MOCK, "Mock X10A cmd=0x%02X bytes=%u", data[1], (unsigned) len);
+                if (data[1] == 0x40 && len >= 4) {
+                    generate_response(data[2]);
+                } else {
+                    generate_diagnostic_response(data[1]);
+                }
             }
 
             size_t available() override {
@@ -59,6 +64,31 @@ namespace esphome
             void check_logger_conflict() override {}
 
         protected:
+            void generate_diagnostic_response(uint8_t cmd) {
+                std::vector<uint8_t> response;
+                switch (cmd) {
+                  case 0x4C:
+                    response = {0x4C, 0x04, 0x29, 0x00, 0x18};
+                    break;
+                  case 0x52:
+                    response.push_back(0x52);
+                    for (size_t idx = 0; idx < 16; idx++) response.push_back(0x00);
+                    break;
+                  case 0x49:
+                    response = {0x49, 0x00};
+                    break;
+                  default:
+                    response = {0x15, 0xEA}; // 0x21 field read is not simulated
+                    break;
+                }
+                if (response[0] != 0x15) {
+                    uint8_t sum = 0;
+                    for (auto byte : response) sum = static_cast<uint8_t>(sum + byte);
+                    response.push_back(static_cast<uint8_t>(~sum));
+                }
+                for (auto byte : response) rx_buffer_.push(byte);
+            }
+
             void generate_response(uint8_t reg_id)
             {
                 // Simulate processing delay
@@ -105,6 +135,14 @@ namespace esphome
 
             std::queue<uint8_t> rx_buffer_;
         };
+
+#ifdef USE_MOCK_UART
+        // Shared simulated serial device for ordinary polling and diagnostic requests.
+        inline MockUART &shared_mock_uart() {
+            static MockUART instance;
+            return instance;
+        }
+#endif
 
     } // namespace altherma_hub
 } // namespace esphome
