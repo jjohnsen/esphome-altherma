@@ -243,6 +243,18 @@ The **Manual Query Registry Result** sensor updates after every call and shows o
 - `Manual query failed reg=0x..: <reason>`: failure with cause (timeout, CRC invalid, out-of-bounds, etc.)
 - `Manual query rejected: <reason>`: invalid parameters, not sent to device
 
+## Experimental X10A memory and field-setting reads
+
+An opt-in, **read-only** diagnostic tool is available on this feature branch.
+It can read the hydro-board software ID, 16-byte RAM windows, and individual
+configuration-memory bytes. A separate experimental service probes the
+undocumented field-setting read command by code (for example `[1-02]`) and
+reports its raw reply without assuming a decoded value.
+
+**[Setup, Home Assistant service examples, address limits, safety notes, and primary sources](docs/x10a-memory-and-field-settings.md)**
+
+No X10A write commands are exposed. The feature is disabled by default.
+
 ## Development
 
 ### Setting Up a Dev Environment
