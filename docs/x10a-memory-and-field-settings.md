@@ -118,51 +118,56 @@ low flag bits. **Do not use the encoding to write anything on another controller
 
 ### Real device observations: EHVH08S23DA6V, software ID `17014001`
 
-Read-only X10A tests from this model returned:
+Read-only X10A tests on the actual unit returned:
 
 ```text
 X10A hydro software ID=17014001
 X10A ram 0x187A n=16: 6A 03 78 00 25 F3 33 3E 00 00 00 00 00 00 00 00
 X10A memory 0x016E n=2: 1F 3F
+X10A memory 0x0174 n=2: 4F 07
 ```
 
-The Daikin installer UI on this actual unit shows
-`[0-0B]=42°C` (warm-weather DHW target) and
-`[0-0C]=60°C` (cold-weather DHW target).
-The recorded memory bytes agree **exactly** with the upstream persisted
-temperature encoding `(byte >> 2) + per-setting minimum`:
+**Four of four** persisted-memory readbacks match the temperatures photographed
+in Daikin's installer UI, when decoded with the ESPAltherma 2 persisted
+temperature encoding `(byte >> 2) + field-specific minimum`:
 
-| Memory offset | Value | Decoded with Daikin manual minimum | Actual UI setting | Evidence |
+| Memory offset | Raw value | Decoding | Actual UI setting | Confidence |
 | --- | --- | --- | --- | --- |
-| 366 / `0x016E` | `0x1F` | `(0x1F >> 2) + 35 = 42°C` | `[0-0B] = 42°C` | Strong matching candidate |
-| 367 / `0x016F` | `0x3F` | `(0x3F >> 2) + 45 = 60°C` | `[0-0C] = 60°C` | Strong matching candidate |
+| 366 / `0x016E` | `0x1F` | `(0x1F >> 2) + 35 = 42°C` | `[0-0B] = 42°C` | Strong observational match |
+| 367 / `0x016F` | `0x3F` | `(0x3F >> 2) + 45 = 60°C` | `[0-0C] = 60°C` | Strong observational match |
+| 372 / `0x0174` | `0x4F` | `(0x4F >> 2) + 25 = 44°C` | `[1-02] = 44°C` | Strong match if `[9-01]=25°C` |
+| 373 / `0x0175` | `0x07` | `(0x07 >> 2) + 25 = 26°C` | `[1-03] = 26°C` | Strong match if `[9-01]=25°C` |
 
-Both low flag bits are `11` in these observed bytes; treat these as
-firmware-specific flags, **not** as part of the temperature. The matches
-are observational correlations, not proof of a read/write mapping under
-controlled changes. Prefer validating via repeat read and a manually
-confirmed installer UI state.
+The last two rows assume a 25°C LWT lower bound, which is the manual's
+factory default for `[9-01]`. **The actual [9-01] value still needs
+confirmation from this unit's UI**; do not label that minimum independently
+verified. All four observed raw bytes have low flag bits `11`.
+The temperature payload is in the upper six bits, with low bits reserved
+for other state/flags.
 
-**Important mismatch:** The `0x187A` RAM window begins `6A 03`,
-**not** `00 2A` (42°C as signed Q8.8, little-endian). Applying the
-ESPAltherma 2 fixed-point interpretation gives approximately 3.41°C.
-Thus the `18002904` profile's **RAM positions must not be reused**
-for `17014001`. Only the **two persistent memory offsets** currently
-show a compelling match.
+**Scope:** These four correlations strongly support reusing the
+**persistent-memory offsets and encoding** from the `18002904` profile
+on the observed `17014001` unit. This is *not* a proven general
+address map, and does not validate writes. Repeat observations or a safe
+UI-led comparison would strengthen the conclusion.
 
-**Next read-only test** (no writes): `memory` offset `0x0174`,
-length `2`, to test whether the upstream `[1-02]`/`[1-03]`
-offsets 372/373 are reused. The UI on this unit reports
-`[1-02]=44°C` and `[1-03]=26°C`. If the lower LWT bound
-`[9-01]` is 25°C and the encoding matches, masked high bits
-`byte & 0xFC` would be `0x4C` and `0x04` in that order.
-These are **predictions only**, and the actual limits and flag bits
-have not yet been read/verified.
+**Important RAM mismatch:** The `0x187A` RAM window begins `6A 03`,
+**not** `00 2A` (42°C as signed Q8.8, little-endian).
+Applying ESPAltherma 2's fixed-point interpretation gives about 3.41°C,
+not 42°C. **Do not reuse the `18002904` RAM positions for writes**
+on `17014001`.
 
-Do not add software ID `17014001` to an upstream **write-control**
-allowlist based on these observations. Field-setting command
-`0x21/0x49` is also still unverified; these results were obtained
-through direct memory command `0x49`.
+**Recommended next checks, still read-only:** Confirm installer field
+`[9-01]` (the low LWT limit) on the display. Only then consider
+reading `0x0116` (278) and `0x0176` (374), which ESPAltherma
+`18002904` uses as weather-curve mode bytes, comparing them with the
+actual `[5.B]` and `[2.4]` modes. Their meaning on `17014001` is
+**not yet verified**. Avoid full memory sweeps.
+
+Do not add software ID `17014001` to any **write-control**
+allowlist from these observations. The proposed field-setting command
+`0x21/0x49` is **still unverified**; the successful reads above all used
+direct memory command `0x49`.
 
 ### Cross-check: EAVH16S18DA6V (upstream control example)
 
