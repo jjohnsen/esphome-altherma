@@ -97,7 +97,8 @@ The entity name and service prefix depend on the ESPHome node name.
 
 ## Field-setting candidates from the Daikin manual
 
-**Heat pump family:** ERGA04-08DAV3(A) + EHVH04/08S18/23DA6V.
+**Heat pump family:** ERGA04-08DAV3(A) + EHVH04/08S18/23DA6V(G).
+The Daikin guide explicitly includes **EHVH08S23DA6V(G)**.
 The installer's **Field settings table** identifies these settings:
 
 | Field code | Meaning | ESPAltherma beta example RAM | Beta memory offset |
@@ -145,7 +146,7 @@ even when ordinary sensor reading works.
 
 ## Primary sources and research trail
 
-- [Daikin Installer reference guide 4P618956-1, ERGA04-08DAV3 + EHVH-UD6V](https://www.daikin.eu/content/dam/document-library/Installer-reference-guide/heat/air-to-water-heat-pump-low-temperature/EHVH-UD6V%2CERGA04-08DVA_4PEN618956-1_Installer%20reference%20guide_English.pdf) — field codes, descriptions, range/defaults (see "Field settings table").
+- [Daikin Installer reference guide 4P495248-1A (2018.11), ERGA04-08DAV3(A) + EHVH08S23DA6V(G)](https://www.daikin.ee/content/dam/document-library/Installer-reference-guide/heat/air-to-water-heat-pump-low-temperature/ERGA-DVA%2C%20EHVH-D9WG%2C%20EHVH-D6VG%2C%20EHVX-D9WG%2C%20EHVH-D6VG_4PEN495248-1A_2018_11_installer%20reference%20guide_English.pdf) — exact family and model named in cover; field settings table (PDF pages 97-106) and weather-dependent curve explanations (PDF pages 54, 65).
 - [ESPAltherma beta \`include/control.h\`](https://github.com/raomin/ESPAltherma/blob/beta/include/control.h) — observed \`0x4C\`, \`0x52\`, \`0x49\` read protocol and one firmware-specific address profile.
 - [ESPAltherma \`Daikin I protocol.md\`](https://github.com/raomin/ESPAltherma/blob/beta/doc/Daikin%20I%20protocol.md) — \`0x40\` register protocol, checksum, and the **unverified** \`0x21/0x49\` page/setting read example.
 - [ESPAltherma issue #1: control over serial port](https://github.com/raomin/ESPAltherma/issues/1) — community reverse-engineering of EEPROM reads and comparisons with physical EEPROM dumps.
