@@ -8,6 +8,20 @@ int main() {
   uint8_t frame[16] = {};
   assert(build_frame(0x4C, nullptr, 0, frame, sizeof(frame)) == 3);
   assert(frame[0] == 0x02 && frame[1] == 0x4C && frame[2] == 0xB1);
+  // Daikin Configurator auto-detect V command (read-only on the wire).
+  assert(build_frame(0x56, nullptr, 0, frame, sizeof(frame)) == 3);
+  const uint8_t micon_query[] = {0x02, 0x56, 0xA7};
+  assert(std::memcmp(frame, micon_query, sizeof(micon_query)) == 0);
+  const uint8_t micon_reply[] = {0x56, 0x62, 0x38, 0x0F};
+  uint16_t micon_id = 0;
+  assert(decode_micon_id(micon_reply, sizeof(micon_reply), micon_id));
+  assert(micon_id == 0x3862);
+  const uint8_t micon_wrong_crc[] = {0x56, 0x62, 0x38, 0x00};
+  assert(!decode_micon_id(micon_wrong_crc, sizeof(micon_wrong_crc), micon_id));
+  const uint8_t micon_wrong_opcode[] = {0x57, 0x62, 0x38, 0x0E};
+  assert(!decode_micon_id(micon_wrong_opcode, sizeof(micon_wrong_opcode), micon_id));
+  assert(!decode_micon_id(micon_reply, 3, micon_id));
+
   const uint8_t addr[] = {0x7A, 0x18};
   assert(build_frame(0x52, addr, sizeof(addr), frame, sizeof(frame)) == 5);
   const uint8_t ram_query[] = {0x04, 0x52, 0x7A, 0x18, 0x17};

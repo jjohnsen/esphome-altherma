@@ -51,6 +51,11 @@ altherma_hub:
   uart_id: uart_bus
   update_interval: 30s
   query_result_text_sensor: query_registry_result
+  # For experimental one-shot identity testing:
+  # enable_memory_diagnostics: true
+  # identify_on_boot: true  # Only after confirming 0x56 works on this unit
+  # software_id_text_sensor: altherma_hydro_software_id
+  # micon_id_text_sensor: altherma_hydro_micon_id
 
 text_sensor:
   - platform: template

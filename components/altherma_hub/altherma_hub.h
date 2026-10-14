@@ -116,9 +116,14 @@ namespace esphome
       void queue_manual_query(std::string registry_id, int32_t offset, int32_t convid, int32_t datasize);
       void queue_read_memory(std::string space, std::string address, int32_t length);
       void queue_software_id();
+      void queue_micon_id();
+      void queue_identify_controller();
       void queue_field_setting(std::string code);
       void set_enable_memory_diagnostics(bool enabled) { this->enable_memory_diagnostics_ = enabled; }
       void set_enable_experimental_field_settings(bool enabled) { this->enable_experimental_field_settings_ = enabled; }
+      void set_identify_on_boot(bool enabled) { this->identify_on_boot_ = enabled; }
+      void set_software_id_text_sensor(text_sensor::TextSensor *sensor) { this->software_id_text_sensor_ = sensor; }
+      void set_micon_id_text_sensor(text_sensor::TextSensor *sensor) { this->micon_id_text_sensor_ = sensor; }
 
     protected:
       enum class ManualQueryStatusLevel : uint8_t {
@@ -130,6 +135,7 @@ namespace esphome
       enum class DiagnosticKind : uint8_t {
         NONE,
         SOFTWARE_ID,
+        MICON_ID,
         RAM,
         MEMORY,
         FIELD_SETTING,
@@ -187,6 +193,10 @@ namespace esphome
 
       bool enable_memory_diagnostics_{false};
       bool enable_experimental_field_settings_{false};
+      bool identify_on_boot_{false};
+      bool identification_sequence_active_{false};
+      text_sensor::TextSensor *software_id_text_sensor_{nullptr};
+      text_sensor::TextSensor *micon_id_text_sensor_{nullptr};
       DiagnosticKind diagnostic_kind_{DiagnosticKind::NONE};
       bool diagnostic_pending_{false};
       bool diagnostic_active_{false};

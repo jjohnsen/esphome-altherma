@@ -34,6 +34,16 @@ inline bool valid_reply(const uint8_t *reply, size_t length, uint8_t command) {
          checksum(reply, length - 1) == reply[length - 1];
 }
 
+// Daikin Configurator auto-detect (V command): response is
+// [0x56, low byte of Micon ID, high byte of Micon ID, checksum].
+// It is a controller ID, not a unique physical model or software ID.
+inline bool decode_micon_id(const uint8_t *reply, size_t length, uint16_t &micon_id) {
+  if (length != 4 || !valid_reply(reply, length, 0x56)) return false;
+  micon_id = static_cast<uint16_t>(reply[1]) |
+             (static_cast<uint16_t>(reply[2]) << 8);
+  return true;
+}
+
 inline bool nack(const uint8_t *reply, size_t length) {
   return reply != nullptr && length == 2 && reply[0] == 0x15 && reply[1] == 0xEA;
 }

@@ -54,9 +54,15 @@ void AlthermaHub::setup() {
     this->register_service(&AlthermaHub::queue_read_memory, "read_memory",
                            {"space", "address", "length"});
     this->register_service(&AlthermaHub::queue_software_id, "read_software_id");
+    this->register_service(&AlthermaHub::queue_micon_id, "read_micon_id");
+    this->register_service(&AlthermaHub::queue_identify_controller, "identify_controller");
   }
   if (this->enable_experimental_field_settings_) {
     this->register_service(&AlthermaHub::queue_field_setting, "read_field_setting", {"code"});
+  }
+  if (this->identify_on_boot_ && this->enable_memory_diagnostics_) {
+    // Opt-in only. No probe is sent on standard factory installations.
+    this->queue_identify_controller();
   }
 }
 

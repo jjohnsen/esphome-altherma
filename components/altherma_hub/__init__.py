@@ -14,17 +14,27 @@ AlthermaHub = altherma_hub_ns.class_(
     uart.UARTDevice,
 )
 
-CONFIG_SCHEMA = (
+def _validate_identification(config):
+    if config["identify_on_boot"] and not config["enable_memory_diagnostics"]:
+        raise cv.Invalid("identify_on_boot requires enable_memory_diagnostics: true")
+    return config
+
+
+CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(AlthermaHub),
             cv.Optional("query_result_text_sensor"): cv.use_id(text_sensor.TextSensor),
             cv.Optional("enable_memory_diagnostics", default=False): cv.boolean,
             cv.Optional("enable_experimental_field_settings", default=False): cv.boolean,
+            cv.Optional("identify_on_boot", default=False): cv.boolean,
+            cv.Optional("software_id_text_sensor"): cv.use_id(text_sensor.TextSensor),
+            cv.Optional("micon_id_text_sensor"): cv.use_id(text_sensor.TextSensor),
         }
     )
     .extend(cv.polling_component_schema("30s"))
-    .extend(uart.UART_DEVICE_SCHEMA)
+    .extend(uart.UART_DEVICE_SCHEMA),
+    _validate_identification,
 )
 
 
@@ -39,6 +49,14 @@ async def to_code(config):
 
     cg.add(var.set_enable_memory_diagnostics(config["enable_memory_diagnostics"]))
     cg.add(var.set_enable_experimental_field_settings(config["enable_experimental_field_settings"]))
+    cg.add(var.set_identify_on_boot(config["identify_on_boot"]))
+
+    if "software_id_text_sensor" in config:
+        sensor = await cg.get_variable(config["software_id_text_sensor"])
+        cg.add(var.set_software_id_text_sensor(sensor))
+    if "micon_id_text_sensor" in config:
+        sensor = await cg.get_variable(config["micon_id_text_sensor"])
+        cg.add(var.set_micon_id_text_sensor(sensor))
 
 
 # Shared configuration constants
