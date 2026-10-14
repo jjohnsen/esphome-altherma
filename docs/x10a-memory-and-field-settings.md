@@ -125,6 +125,8 @@ X10A hydro software ID=17014001
 X10A ram 0x187A n=16: 6A 03 78 00 25 F3 33 3E 00 00 00 00 00 00 00 00
 X10A memory 0x016E n=2: 1F 3F
 X10A memory 0x0174 n=2: 4F 07
+X10A memory 0x01B5 n=4: 5B 53 3B 73
+X10A memory 0x01A2 n=1: 1F
 ```
 
 **Four of four** persisted-memory readbacks match the temperatures photographed
@@ -145,7 +147,48 @@ verified. All four observed raw bytes have low flag bits `11`.
 The temperature payload is in the upper six bits, with low bits reserved
 for other state/flags.
 
-**Scope:** These four correlations strongly support reusing the
+**CA Configurator table correlation (read-only observation, DA unit):**
+A provided older `EditSetting.ini` from Daikin Configurator includes named
+configuration parameters, hex addresses, bit masks and shifts. Four observed
+`17014001` memory positions for weather curves match the corresponding
+Configurator addresses minus `0x43`. That offset predicts the following
+five *additional* fields, all confirmed against the tested DA unit's installer
+UI without any memory writes:
+
+| Field | Configurator address | X10A memory address | Raw | Extracted index | UI |
+| --- | --- | --- | --- | --- | --- |
+| `[6-0A]` DHW comfort | `0x01F8` | `0x01B5` | `0x5B` | `(0x5B & 0xFC) >> 2 = 22`; `30 + 22 = 52°C` | 52°C |
+| `[6-0B]` DHW eco | `0x01F9` | `0x01B6` | `0x53` | `(0x53 & 0xFC) >> 2 = 20`; `30 + 20 = 50°C` | 50°C |
+| `[6-0C]` DHW reheat | `0x01FA` | `0x01B7` | `0x3B` | `(0x3B & 0xFC) >> 2 = 14`; `30 + 14 = 44°C` | 44°C |
+| `[6-0D]` DHW mode | `0x01FB` | `0x01B8` | `0x73` | `(0x73 & 0x0C) >> 2 = 0` | 0, reheat only |
+| `[5-05]` Current limit | `0x01E5` | `0x01A2` | `0x1F` | `(0x1F & 0xFC) >> 2 = 7`; base 0 A | 7 A |
+
+Thus **nine individual settings** now correlate with the proposed `-0x43`
+address transformation and on-device UI, across several unrelated
+settings groups. The failed earlier guess
+`0x0163 + 15 * group + item` is **not** a universal mapping:
+`0x01C7: 17 37 3F 2B` does *not* represent
+`[6-0A]`.. `[6-0D]`.
+
+The Configurator INI describes an **older CA model family**, whereas the
+observations are from a **DA controller** with ID `17014001`.
+Addresses, minima, permitted ranges and mask details are only validated
+for the settings shown above; they MUST NOT be assumed to generalize to
+other devices, other addresses or write support. For example CA
+`LO_LO_DHW` has an older 55°C base and should not supersede the
+model-specific 45°C limit used to interpret `[0-0C]` on the tested unit.
+
+**Next controlled, read-only check**: read memory `0x0198`, length 2.
+The CA Configurator records `[4-08]` power-control mode at
+`0x01DB`, mask `0xC0`, shift `6` and `[4-09]` current-vs-power
+choice at `0x01DC`, mask `0x0C`, shift `2`. Installer UI reports
+`[4-08]=1` (continuous) and `[4-09]=0` (amps). Expected extracted
+indices: `(byte0 & 0xC0)>>6 == 1` and
+`(byte1 & 0x0C)>>2 == 0`; full byte values and other bits are
+**not** predicted. Do not change the user's 7 A current limit as part
+of these tests.
+
+**Scope:** The first four settings also match EEPROM offsets from the
 **persistent-memory offsets and encoding** from the `18002904` profile
 on the observed `17014001` unit. This is *not* a proven general
 address map, and does not validate writes. Repeat observations or a safe
