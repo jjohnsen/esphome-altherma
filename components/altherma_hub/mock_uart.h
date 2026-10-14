@@ -136,5 +136,13 @@ namespace esphome
             std::queue<uint8_t> rx_buffer_;
         };
 
+#ifdef USE_MOCK_UART
+        // Shared simulated serial device for ordinary polling and diagnostic requests.
+        inline MockUART &shared_mock_uart() {
+            static MockUART instance;
+            return instance;
+        }
+#endif
+
     } // namespace altherma_hub
 } // namespace esphome
