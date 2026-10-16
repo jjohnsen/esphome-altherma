@@ -1,0 +1,46 @@
+# Isolated proof of concept: 3 native ESPHome entities created in C++ at startup.
+# No model sensor packages, real X10A connection, or sensor YAML required.
+# Flash using: esphome run esphome-altherma-dynamic-mock.yaml
+esphome:
+  name: altherma-dynamic-mock
+  friendly_name: Altherma Dynamic Mock
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  custom_services: true
+
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+    ssid: "Altherma Dynamic Mock"
+
+captive_portal:
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 9600
+  data_bits: 8
+  parity: EVEN
+  stop_bits: 1
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [altherma_hub]
+
+altherma_hub:
+  id: altherma_hub_1
+  uart_id: uart_bus
+  update_interval: 10s
+  dynamic_mock_sensors: true
