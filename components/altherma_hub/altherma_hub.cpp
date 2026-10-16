@@ -1,4 +1,5 @@
 #include "altherma_hub.h"
+#include "esphome/core/application.h"
 #include "esphome/core/log.h"
 #include "mock_uart.h"
 #include "labeldef.h"
@@ -49,6 +50,40 @@ void AlthermaHub::setup() {
 
   this->register_service(&AlthermaHub::queue_manual_query, "query_register",
                          {"register", "offset", "convid", "datasize"});
+
+  if (this->dynamic_mock_sensors_) {
+    this->setup_dynamic_mock_sensors_();
+  }
+}
+
+// Runtime entity registration experiment: no sensor objects are generated
+// by ESPHome Python sensor schemas. Static names remain valid for the life
+// of the firmware; name hash 0 asks ESPHome to calculate a stable hash.
+void AlthermaHub::setup_dynamic_mock_sensors_() {
+  this->mock_outdoor_temperature_ = new sensor::Sensor();
+  this->mock_leaving_water_temperature_ = new sensor::Sensor();
+  this->mock_compressor_frequency_ = new sensor::Sensor();
+
+  this->mock_outdoor_temperature_->set_accuracy_decimals(1);
+  this->mock_leaving_water_temperature_->set_accuracy_decimals(1);
+  this->mock_compressor_frequency_->set_accuracy_decimals(0);
+
+  this->mock_outdoor_temperature_->set_state_class(sensor::STATE_CLASS_MEASUREMENT);
+  this->mock_leaving_water_temperature_->set_state_class(sensor::STATE_CLASS_MEASUREMENT);
+  this->mock_compressor_frequency_->set_state_class(sensor::STATE_CLASS_MEASUREMENT);
+
+  App.register_sensor(this->mock_outdoor_temperature_, "Mock Outdoor Temperature", 0, 0);
+  App.register_sensor(this->mock_leaving_water_temperature_, "Mock Leaving Water Temperature", 0, 0);
+  App.register_sensor(this->mock_compressor_frequency_, "Mock Compressor Frequency", 0, 0);
+  ESP_LOGI(TAG, "Registered 3 mock ESPHome sensors dynamically at startup");
+}
+
+void AlthermaHub::publish_dynamic_mock_sensors_() {
+  // Synthetic test values; independent of X10A / the attached heat pump.
+  const float step = static_cast<float>(this->mock_sample_++ % 10);
+  this->mock_outdoor_temperature_->publish_state(7.0f + step * 0.1f);
+  this->mock_leaving_water_temperature_->publish_state(32.0f + step * 0.2f);
+  this->mock_compressor_frequency_->publish_state(30.0f + step);
 }
 
 AlthermaHub::~AlthermaHub() {
@@ -70,6 +105,9 @@ void AlthermaHub::publish_manual_query_statusf_(int level, const char *fmt, ...)
 }
 
 void AlthermaHub::update() {
+  if (this->dynamic_mock_sensors_) {
+    this->publish_dynamic_mock_sensors_();
+  }
   if (this->registers_.empty()) {
     ESP_LOGV(TAG, "No registers configured");
     return;
