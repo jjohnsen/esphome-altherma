@@ -20,6 +20,8 @@ CONFIG_SCHEMA = (
             cv.GenerateID(): cv.declare_id(AlthermaHub),
             cv.Optional("query_result_text_sensor"): cv.use_id(text_sensor.TextSensor),
             cv.Optional("dynamic_mock_sensors", default=False): cv.boolean,
+            cv.Optional("ldd_dynamic_sensors", default=False): cv.boolean,
+            cv.Optional("ldd_mock_values", default=False): cv.boolean,
         }
     )
     .extend(cv.polling_component_schema("30s"))
@@ -34,6 +36,10 @@ async def to_code(config):
 
     if config["dynamic_mock_sensors"]:
         cg.add(var.set_dynamic_mock_sensors(True))
+    if config["ldd_dynamic_sensors"]:
+        cg.add(var.set_ldd_dynamic_sensors(True))
+    if config["ldd_mock_values"]:
+        cg.add(var.set_ldd_mock_values(True))
 
     if "query_result_text_sensor" in config:
         query_sensor = await cg.get_variable(config["query_result_text_sensor"])
