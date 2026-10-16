@@ -108,6 +108,8 @@ namespace esphome
       void register_sensor(AlthermaSensorBase *sensor);
       // Proof of concept: register mock ESPHome entities in setup(), not YAML.
       void set_dynamic_mock_sensors(bool enabled) { this->dynamic_mock_sensors_ = enabled; }
+      void set_ldd_dynamic_sensors(bool enabled) { this->ldd_dynamic_sensors_ = enabled; }
+      void set_ldd_mock_values(bool enabled) { this->ldd_mock_values_ = enabled; }
       void set_query_result_text_sensor(text_sensor::TextSensor *text_sensor) {
         this->query_result_text_sensor_ = text_sensor;
       }
@@ -127,6 +129,8 @@ namespace esphome
       unsigned char calculate_crc(unsigned char *src, size_t len);
       bool decode_label(AlthermaSensorBase *sensor, unsigned char *frame, size_t frame_len, LabelDef &out);
       void publish_manual_query_statusf_(int level, const char *fmt, ...);
+      void setup_ldd_dynamic_sensors_();
+      void publish_ldd_mock_sensors_();
       void setup_dynamic_mock_sensors_();
       void publish_dynamic_mock_sensors_();
       void begin_poll_cycle_();
@@ -151,6 +155,10 @@ namespace esphome
       sensor::Sensor *mock_leaving_water_temperature_{nullptr};
       sensor::Sensor *mock_compressor_frequency_{nullptr};
       uint32_t mock_sample_{0};
+      bool ldd_dynamic_sensors_{false};
+      bool ldd_mock_values_{false};
+      uint32_t ldd_mock_sample_{0};
+      std::vector<AlthermaSensor *> ldd_sensors_;
 
       static constexpr size_t RX_BUFFER_SIZE = 64;
       static constexpr uint32_t QUERY_TIMEOUT_MS = 300;
