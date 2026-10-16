@@ -1,0 +1,47 @@
+# LDD-derived runtime sensors: proof of concept (no heat pump required).
+# Source profile: tests/fixtures/ldd_lt_da_sample.csv -> generated C++ header.
+# All 11 entities are dynamically registered by AlthermaHub::setup().
+esphome:
+  name: altherma-ldd-mock
+  friendly_name: Altherma LDD Mock
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  custom_services: true
+
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+    ssid: "Altherma LDD Mock"
+
+captive_portal:
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 9600
+  data_bits: 8
+  parity: EVEN
+  stop_bits: 1
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [altherma_hub]
+
+altherma_hub:
+  id: altherma_hub_1
+  uart_id: uart_bus
+  update_interval: 10s
+  ldd_dynamic_sensors: true
+  ldd_mock_values: true
