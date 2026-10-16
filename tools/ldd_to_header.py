@@ -32,7 +32,8 @@ def load_rows(path):
         return rows
     if path.suffix.lower() == ".csv":
         with path.open(encoding="utf-8-sig", newline="") as stream:
-            return list(csv.DictReader(stream))
+            return list(csv.DictReader(line for line in stream
+                                       if line.strip() and not line.lstrip().startswith("#")))
     raise ValueError("Expected a .ldd or decoded .csv file")
 
 
