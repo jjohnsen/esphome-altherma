@@ -34,6 +34,11 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
+    # ESPHome enables USE_SENSOR only when YAML declares sensor entities.
+    # Dynamically created C++ entities need the sensor registry compiled in.
+    if config["dynamic_mock_sensors"] or config["ldd_dynamic_sensors"]:
+        cg.add_define("USE_SENSOR")
+
     if config["dynamic_mock_sensors"]:
         cg.add(var.set_dynamic_mock_sensors(True))
     if config["ldd_dynamic_sensors"]:
