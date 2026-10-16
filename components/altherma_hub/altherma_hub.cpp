@@ -1,5 +1,6 @@
 #include "altherma_hub.h"
 #include "esphome/core/application.h"
+#include "ldd_generated_profile.h"
 #include "esphome/core/log.h"
 #include "mock_uart.h"
 #include "labeldef.h"
@@ -54,6 +55,40 @@ void AlthermaHub::setup() {
   if (this->dynamic_mock_sensors_) {
     this->setup_dynamic_mock_sensors_();
   }
+  if (this->ldd_dynamic_sensors_) {
+    this->setup_ldd_dynamic_sensors_();
+  }
+}
+
+// LDD definitions are generated offline from Daikin D-Checker .ldd / CSV.
+// The entities are instantiated here during ESPHome boot, not by sensor YAML.
+void AlthermaHub::setup_ldd_dynamic_sensors_() {
+  for (const auto &def : LDD_SENSOR_DEFINITIONS) {
+    auto *sensor = new AlthermaSensor();
+    sensor->set_registry_id(def.register_id);
+    sensor->set_offset(def.offset);
+    sensor->set_datasize(def.data_size);
+    sensor->set_convid(def.converter_id);
+    sensor->set_accuracy_decimals(def.decimals);
+    sensor->set_state_class(sensor::STATE_CLASS_MEASUREMENT);
+
+    // Register with both ESPHome discovery and the existing X10A decoder.
+    // Names are static string literals from the generated header.
+    App.register_sensor(sensor, def.name, 0, 0);
+    this->register_sensor(sensor);
+    this->ldd_sensors_.push_back(sensor);
+  }
+  ESP_LOGI(TAG, "Registered %u LDD-derived ESPHome sensors at boot",
+           static_cast<unsigned>(this->ldd_sensors_.size()));
+}
+
+void AlthermaHub::publish_ldd_mock_sensors_() {
+  // Synthetic readings for discovery-only testing. No UART traffic.
+  const float step = static_cast<float>(this->ldd_mock_sample_++ % 10) * 0.1f;
+  for (size_t i = 0; i < this->ldd_sensors_.size(); i++) {
+    const float base = 16.0f + static_cast<float>(i) * 2.0f;
+    this->ldd_sensors_[i]->sensor::Sensor::publish_state(base + step);
+  }
 }
 
 // Runtime entity registration experiment: no sensor objects are generated
@@ -107,6 +142,11 @@ void AlthermaHub::publish_manual_query_statusf_(int level, const char *fmt, ...)
 void AlthermaHub::update() {
   if (this->dynamic_mock_sensors_) {
     this->publish_dynamic_mock_sensors_();
+  }
+  if (this->ldd_dynamic_sensors_ && this->ldd_mock_values_) {
+    // Exercise dynamic entity discovery without interacting with a heat pump.
+    this->publish_ldd_mock_sensors_();
+    return;
   }
   if (this->registers_.empty()) {
     ESP_LOGV(TAG, "No registers configured");
