@@ -1,0 +1,17 @@
+# Selected rows from previously decoded Daikin D-Checker LT_DA_04-08kW LDD.
+# Source data is intentionally reduced. No proprietary .ldd binaries are shipped.
+index,DataId,Offset,Bytes,ConvId,FormatStr,DataKind,Enabled,IsDisplay,IsDispLog,LabelStr,IsDispGraph,IsGraphLog,YAxis,IndoorUnitAdr,BitPos,Group,DataType,LabelId,OriginalLabelStr,MobFld1
+21,0x10,0,1,217,%s,,True,True,False,Operation Mode,-1,-1,-1,-1,-1,-1,-1,521,Operation Mode,1
+53,0x20,0,2,105,%.1f,A,True,True,False,Outdoor air temp.(R1T),0,-1,1,-1,-1,-1,1,782,Outdoor air temp.(R1T),2
+55,0x20,4,2,105,%.1f,A,True,True,False,Discharge pipe temp.,2,-1,1,-1,-1,-1,1,299,Discharge pipe temp.,5
+57,0x20,8,2,105,%.1f,A,True,True,False,Heat exchanger mid-temp.,-1,-1,-1,-1,-1,-1,1,375,Heat exchanger mid-temp.,0
+62,0x21,0,2,105,%.1f,A,True,True,False,INV primary current (A),-1,-1,1,-1,-1,-1,-1,437,INV primary current (A),0
+64,0x21,4,2,101,%.0f,A,True,True,False,Voltage (N-phase) (V),-1,-1,1,-1,-1,-1,-1,1465,Voltage (N-phase) (V),0
+82,0x3*,0,1,152,%.0f,A,True,True,False,INV frequency (rps),-1,-1,1,-1,-1,0,-1,425,INV frequency (rps),7
+119,0x60,7,2,105,%.1f,A,True,True,False,DHW setpoint,-1,-1,1,255,-1,-1,1,296,DHW setpoint,0
+120,0x60,9,2,105,%.1f,A,True,True,False,LW setpoint (main),-1,-1,1,255,-1,-1,1,456,LW setpoint (main),0
+143,0x61,2,2,105,%.1f,A,True,True,False,Leaving water temp. before BUH (R1T),-1,-1,1,255,-1,-1,1,443,Leaving water temp. before BUH (R1T),0
+144,0x61,4,2,105,%.1f,A,True,True,False,Leaving water temp. after BUH (R2T),-1,-1,1,255,-1,-1,1,442,Leaving water temp. after BUH (R2T),0
+146,0x61,8,2,105,%.1f,A,True,True,False,Inlet water temp.(R4T),-1,-1,1,255,-1,-1,1,416,Inlet water temp.(R4T),0
+149,0x61,14,2,105,%.1f,A,True,True,False,Ext. indoor ambient sensor (R6T),-1,-1,1,255,-1,-1,1,334,Ext. indoor ambient sensor (R6T),0
+152,0x62,2,1,307,%s,D,True,True,False,Reheat ON/OFF,-1,-1,-1,255,-1,-1,-1,1979,Reheat ON/OFF,0
