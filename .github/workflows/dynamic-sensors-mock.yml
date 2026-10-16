@@ -1,0 +1,24 @@
+name: Dynamic Sensor Mock POC
+
+on:
+  push:
+    branches:
+      - feature/dynamic-sensors-mock
+    paths:
+      - "components/altherma_hub/**"
+      - "esphome-altherma-dynamic-mock.yaml"
+      - ".github/workflows/dynamic-sensors-mock.yml"
+  workflow_dispatch:
+
+jobs:
+  build-mock:
+    name: Compile runtime-created ESPHome sensors
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v7
+      - name: Build mock ESP32 firmware
+        uses: esphome/build-action@v7
+        with:
+          yaml-file: esphome-altherma-dynamic-mock.yaml
+          version: stable
