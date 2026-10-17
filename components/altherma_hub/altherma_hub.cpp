@@ -324,6 +324,21 @@ void AlthermaHub::handle_complete_frame_() {
   }
 
   if (this->manual_query_active_) {
+    // Same bounds as decode_label(): the requested field must lie inside the
+    // data part of the frame (header 3 bytes, CRC excluded). Without this a
+    // large offset from the query_register service reads past rx_buffer_.
+    const size_t payload_start = static_cast<size_t>(this->manual_offset_) + 3;
+    const size_t payload_end = payload_start + static_cast<size_t>(this->manual_datasize_);
+    if (payload_end > this->rx_len_ - 1) {
+      this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
+                                          "Manual query failed reg=0x%02X: offset=%d size=%d outside frame "
+                                          "(data bytes=%u)",
+                                          this->current_register_, this->manual_offset_, this->manual_datasize_,
+                                          (unsigned) (this->rx_len_ - 4));
+      this->advance_register_();
+      return;
+    }
+
     LabelDef label(
       this->manual_register_,
       this->manual_offset_,
