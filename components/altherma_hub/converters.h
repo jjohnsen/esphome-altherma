@@ -173,10 +173,9 @@ public:
                 strcat(def->asString, "---");
                 return;
             }
-            unsigned short num3 = (unsigned short)((int)data[1] * 256);
-            num3 |= (unsigned short)(data[0] & 127);
-            dblData = (double)((num3 & 65280) / 256);
-            dblData += (double)(num3 & 255) / 256.0;
+            // Signed (ESPAltherma #543, #560): read as unsigned, a heat exchanger
+            // at -6 °C showed 250 °C, and bit 7 of the fraction was dropped.
+            dblData = (double)getSignedValue(data, num, 0) / 256.0;
             break;
         }
         case 151:
