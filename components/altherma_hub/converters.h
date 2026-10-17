@@ -7,6 +7,7 @@
 // the body is not compiled at global scope in main.cpp.
 #ifdef ALTHERMA_HUB_IMPL
 #include <string.h>
+#include <cmath>
 char buff[64];
 class Converter
 {
@@ -228,16 +229,11 @@ public:
             convertTable204(data, def->asString);
             return;
         case 211:
-            if (data == 0)
-            {
-                strcat(def->asString, "OFF");
-                return;
-            }
-            else
-            {
-                dblData = (uint)(double)data[0];
-                break;
-            }
+            // Numeric fan step. The original "OFF for 0" branch compared the
+            // pointer (data == 0) and never ran; every profile maps conv 211 to
+            // a numeric sensor, which could not publish "OFF" anyway.
+            dblData = (double)data[0];
+            break;
 
         case 215:
         case 216:
@@ -303,7 +299,7 @@ public:
             sprintf(def->asString, "Conv %d not avail.", convId);
             return;
         }
-        if (dblData != NAN)
+        if (!std::isnan(dblData))
         {
             sprintf(def->asString, "%g", dblData);
         }
@@ -456,7 +452,15 @@ private:
                            "UseStrdThrm(ht)2",
                            "UseStrdThrm(ht)3",
                            "UseStrdThrm(ht)4"};
-        sprintf(ret, r217[(int)data[0]]);
+        const size_t count = sizeof(r217) / sizeof(r217[0]);
+        if (data[0] < count)
+        {
+            strcat(ret, r217[data[0]]);
+        }
+        else
+        {
+            sprintf(ret, "Unknown (%u)", (unsigned)data[0]);
+        }
     }
 
     unsigned short getUnsignedValue(unsigned char *data, int dataSize, int cnvflg)
