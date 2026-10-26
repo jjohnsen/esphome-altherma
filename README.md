@@ -151,6 +151,16 @@ OTA Updates are available within Home Assistant:
 
 ![OTA Updates](img/ota-updates.png)
 
+### Take Control / local component development
+
+`base.yaml` fetches `altherma_hub` from GitHub by default, so Device Builder can import the standard board YAMLs. To compile modified C++ in a local clone instead of `main`, run:
+
+```sh
+esphome -s altherma_component_source components compile esphome-altherma-esp32.yaml
+```
+
+This override is also applied in the CI workflow to test PR-local component changes. When an already adopted device has cached an old GitHub component, refresh the external component cache (`refresh: always`) or clear the cache before checking again.
+
 ### Option 2: Command Line (ESPHome CLI)
 
 1. [Install ESPHome](https://esphome.io/guides/getting_started_command_line/)
