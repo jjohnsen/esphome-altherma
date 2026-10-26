@@ -37,14 +37,14 @@ uart:
   parity: EVEN
   stop_bits: 1
 
+# Factory / Take Control fetches the component from GitHub by default.
+# During local development, override this substitution with "components".
+substitutions:
+  altherma_component_source: github://jjohnsen/esphome-altherma@main
+
 external_components:
-# Uncomment below if you want to "Take Control" in ESPHome Device Builder
-#   - source: github://jjohnsen/esphome-altherma@main
-#     components: [altherma_hub]
-# Comment below if you want to "Take Control" in ESPHome Device Builder
-  - source:
-      type: local
-      path: components
+  - source: ${altherma_component_source}
+    components: [altherma_hub]
 
 altherma_hub:
   id: altherma_hub_1
