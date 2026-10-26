@@ -151,6 +151,16 @@ OTA Updates are available within Home Assistant:
 
 ![OTA Updates](img/ota-updates.png)
 
+### Take Control in ESPHome Device Builder
+
+Factory firmware advertises a separate, GitHub-backed YAML package for adoption via **Take Control**. The four board-specific entry points are in `take-control/` and include `take-control/base.yaml`, which fetches `altherma_hub` and the default sensor mapping from this repository. These files do **not** require a local checkout.
+
+- Default mapping: `confs/erga_eh_da_04_08.yaml`. To select a different model, edit the `altherma_sensors` package in `take-control/base.yaml` via a personal fork, or replace the imported package with your own configuration. The default mapping must match your heat pump.
+- After taking control, the device is built and updated from your ESPHome Device Builder configuration. The factory HTTP OTA/update setup is not automatically included.
+- Local repository builds still use `base.yaml`, `components/`, and `confs/` for development.
+
+**Validation:** The import chain must be tested on an actual ESPHome Device Builder instance with factory-flashed hardware before considering this feature verified.
+
 ### Option 2: Command Line (ESPHome CLI)
 
 1. [Install ESPHome](https://esphome.io/guides/getting_started_command_line/)
