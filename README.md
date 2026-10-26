@@ -127,6 +127,7 @@ switch:
 > * **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** (confirmed working on the bibloc **Altherma 3 R MT (ERRA + ELVH/ELVX)** series — see [discussion #41](https://github.com/jjohnsen/esphome-altherma/discussions/41))
 > * **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**
 > * **EPRA D/D7 with ETV16, ETB16, ETVZ16 (E/E7) 14-18kW** (including ETBX16E9W7 / EPRA18DW17).
+> * **ERLA D / EBV-EBB-EBVZ D series (11–16 kW)** — `confs/erla_d_ebv_ebb_ebvz_11_16.yaml` (tested on ERLA11D2V3 / EBBH11DF6V).
 > 
 > Contributions for other models are welcome!
 
