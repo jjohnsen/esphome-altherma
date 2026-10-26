@@ -71,19 +71,20 @@ packages:
   # Uncomment below if you want to have diagnostic information about the ESP module
   # common_diagnostics: !include common/diagnostics.yaml
 
-  # Uncomment below if you want to "Take Control" in ESPHome Device Builder
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
+  # Default mapping uses a local include relative to this YAML file.
+  # When base.yaml is imported from GitHub, it resolves within the cloned repository.
+  # To load this model independently as a remote package instead:
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
   # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erla_d_ebsh_11_16_ech2o.yaml@main
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/erla_d_ebsh_11_16_ech2o.yaml@main
   # Alternative model mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW:
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/altherma_ehvh_ehvx_cb.yaml@main
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/altherma_ehvh_ehvx_cb.yaml@main
   # Alternative model mapping for EPRA D/D7 ETV16-ETB16-ETVZ16 E/E7 14-18kW (ETBX16E9W7 / EPRA18DW17):
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/epra_d_etv_etb_etvz_14_18.yaml@main
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/epra_d_etv_etb_etvz_14_18.yaml@main
   # Alternative model mapping for ERGA E with EHV/EHB/EHVZ E/EJ 04-08kW (e.g. EHVX04S18EJ6V):
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_e_ej_04_08.yaml@main
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/erga_eh_e_ej_04_08.yaml@main
   # Alternative model mapping for ERLA D / EBV-EBB-EBVZ D 11-16kW:  
-  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erla_d_ebv_ebb_ebvz_11_16.yaml@main
-  # Comment below if you want to "Take Control" in ESPHome Device Builder
+  # altherma_sensors: github://jjohnsen/esphome-altherma/confs/erla_d_ebv_ebb_ebvz_11_16.yaml@main
   altherma_sensors: !include confs/erga_eh_da_04_08.yaml
   # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
   # altherma_sensors: !include confs/erla_d_ebsh_11_16_ech2o.yaml
