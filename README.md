@@ -114,6 +114,9 @@ switch:
 | Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13 |
 | ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25 |
 | ESP32-S3 DevKit | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41 |
+| M5Stack Stamp S3 | EHSX08P50BB | @smdx2 | [Discussion #47](https://github.com/jjohnsen/esphome-altherma/discussions/47) |
+| ESP32 | EHBH08CA3V | @papayou66 | Custom Home Assistant dashboards [Discussion #63](https://github.com/jjohnsen/esphome-altherma/discussions/63) |
+| ESP32-S3 SuperMini | ERLA16D2W17 / EBVX16S23DJ9W | @hansiputz | Custom sensor mapping, including operational findings — [Discussion #48](https://github.com/jjohnsen/esphome-altherma/discussions/48) |
 
 ## Installation
 
