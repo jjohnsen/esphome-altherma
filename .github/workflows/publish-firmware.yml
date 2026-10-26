@@ -17,7 +17,7 @@ jobs:
         esphome-altherma-esp32.factory.yaml
         esphome-altherma-atoms3.factory.yaml
         esphome-altherma-esp8266.factory.yaml
-      esphome-version: 2026.9.1
+      esphome-version: 2026.10.0
       combined-name: esphome-altherma
       #### Modify above here to match your project ####
 
