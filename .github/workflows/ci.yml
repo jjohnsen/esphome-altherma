@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '*.yaml'
+      - 'components/**'
+      - 'confs/**'
       - '.github/workflows/ci.yml'
 
   workflow_dispatch:
@@ -35,6 +37,10 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v7
+      # Use the checked-out PR component code instead of the GitHub default.
+      - name: Use local component source for CI
+        run: |
+          sed -i 's|altherma_component_source: github://jjohnsen/esphome-altherma@main|altherma_component_source: components|' base.yaml
       - name: ESPHome ${{ matrix.esphome-version }}
         uses: esphome/build-action@v7
         with:
