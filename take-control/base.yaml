@@ -1,0 +1,92 @@
+esphome:
+  name: esphome-altherma
+  friendly_name: ESPHome Altherma
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+  # Uncomment below for using mock uart during development:
+  #platformio_options:
+  #  build_flags:
+  #    - -DUSE_MOCK_UART
+
+# To be able to get logs from the device via serial and api.
+logger:
+
+# API is a requirement of the dashboard import.
+api:
+  custom_services: true
+
+# OTA is required for Over-the-Air updating
+ota:
+  - platform: esphome
+
+wifi:
+  # Set up a wifi access point using the device name above
+  ap:
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device.
+captive_portal:
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 9600
+  data_bits: 8
+  parity: EVEN
+  stop_bits: 1
+
+external_components:
+  - source: github://jjohnsen/esphome-altherma@main
+    components: [altherma_hub]
+
+altherma_hub:
+  id: altherma_hub_1
+  uart_id: uart_bus
+  update_interval: 30s
+  query_result_text_sensor: query_registry_result
+
+text_sensor:
+  - platform: template
+    name: "Manual Query Registry Result"
+    id: query_registry_result
+    entity_category: diagnostic
+
+# select:
+#   - platform: template
+#     name: "Heat pump Model"
+#     id: heat_pump_model
+#     options:
+#       - "ERGA D EHV-EHB-EHVZ DA series"
+#     initial_option: "ERGA D EHV-EHB-EHVZ DA series"
+#     optimistic: true
+
+packages:
+  # Uncomment below if you want to have diagnostic information about the ESP module
+  # common_diagnostics: !include common/diagnostics.yaml
+
+  # Uncomment below if you want to "Take Control" in ESPHome Device Builder
+  altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_da_04_08.yaml@main
+  # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erla_d_ebsh_11_16_ech2o.yaml@main
+  # Alternative model mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW:
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/altherma_ehvh_ehvx_cb.yaml@main
+  # Alternative model mapping for EPRA D/D7 ETV16-ETB16-ETVZ16 E/E7 14-18kW (ETBX16E9W7 / EPRA18DW17):
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/epra_d_etv_etb_etvz_14_18.yaml@main
+  # Alternative model mapping for ERGA E with EHV/EHB/EHVZ E/EJ 04-08kW (e.g. EHVX04S18EJ6V):
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erga_eh_e_ej_04_08.yaml@main
+  # Alternative model mapping for ERLA D / EBV-EBB-EBVZ D 11-16kW:  
+  # altherma_sensors: !include github://jjohnsen/esphome-altherma/confs/erla_d_ebv_ebb_ebvz_11_16.yaml@main
+  # Comment below if you want to "Take Control" in ESPHome Device Builder
+  # altherma_sensors: !include confs/erga_eh_da_04_08.yaml
+  # Alternative model mapping for EBSXB16P50DF / ERLA D EBSH-X 11-16kW-ECH2O:
+  # altherma_sensors: !include confs/erla_d_ebsh_11_16_ech2o.yaml
+  # Alternative model mapping for Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW:
+  # altherma_sensors: !include confs/altherma_ehvh_ehvx_cb.yaml
+  # Alternative model mapping for EPRA D/D7 ETV16-ETB16-ETVZ16 E/E7 14-18kW (ETBX16E9W7 / EPRA18DW17):
+  # altherma_sensors: !include confs/epra_d_etv_etb_etvz_14_18.yaml
+  # Alternative model mapping for ERGA E with EHV/EHB/EHVZ E/EJ 04-08kW (e.g. EHVX04S18EJ6V):
+  # altherma_sensors: !include confs/erga_eh_e_ej_04_08.yaml
+  # Alternative model mapping for ERLA D / EBV-EBB-EBVZ D 11-16kW:
+  # altherma_sensors: !include confs/erla_d_ebv_ebb_ebvz_11_16.yaml  
