@@ -331,6 +331,35 @@ void AlthermaHub::handle_complete_frame_() {
   }
 
   if (this->manual_query_active_) {
+    // X10A response frame:
+    // +----------+-------------------------+-----+
+    // | Header   | Payload                 | CRC |
+    // | 3 bytes  | N bytes                 |  1  |
+    // +----------+-------------------------+-----+
+    //            |<------ payload_size --->|
+    //            |    offset               |
+    //            |<---------->|            |
+    //            |            |<- size ->| |
+    //            +------------+----------+-+
+    //
+    // Ensure offset + size fits within the payload.
+    // Use subtraction to avoid integer overflow:
+    //   offset < payload_size
+    //   size <= payload_size - offset
+    const size_t payload_size = this->rx_len_ >= 4 ? this->rx_len_ - 4 : 0;
+    const size_t offset = static_cast<size_t>(this->manual_offset_);
+    const size_t field_size = static_cast<size_t>(this->manual_datasize_);
+
+    if (this->manual_offset_ < 0 || this->manual_datasize_ <= 0 || offset >= payload_size || field_size > payload_size - offset) {      
+      this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
+                                          "Manual query failed reg=0x%02X: offset=%d size=%d outside frame "
+                                          "(data bytes=%u)",
+                                          this->current_register_, this->manual_offset_, this->manual_datasize_,
+                                          (unsigned) (this->rx_len_ - 4));
+      this->advance_register_();
+      return;
+    }
+
     LabelDef label(
       this->manual_register_,
       this->manual_offset_,
