@@ -1,3 +1,6 @@
+substitutions:
+  altherma_component_source: components
+
 packages:
   board: !include esphome-altherma-esp8266.yaml
 
@@ -24,10 +27,9 @@ http_request:
 
 ota:
   - platform: http_request
-    id: ota_http_request
 
 update:
   - platform: http_request
     name: None
     id: update_http_request
-    source: https://esphome-altherma.jjohnsen.no/firmware/esphome-altherma.manifest.json
+    source: https://esphome-altherma.jjohnsen.no/firmware/esphome-altherma.manifest.json?board=esp8266

@@ -1,5 +1,8 @@
+substitutions:
+  altherma_component_source: components
+
 packages:
-  board: !include esphome-altherma-atoms3.yaml
+  board: !include esphome-atoms3.yaml
 
 esphome:
   # This will allow for project identification,
@@ -14,11 +17,6 @@ esphome:
 dashboard_import:
   package_import_url: github://jjohnsen/esphome-altherma/esphome-altherma-atoms3.yaml@main
 
-# Sets up Bluetooth LE (Only on ESP32) to allow the user
-# to provision wifi credentials to the device.
-esp32_improv:
-  authorizer: none
-
 # Sets up the improv via serial client for Wi-Fi provisioning.
 # Handy if your device has a usb port for the user to add credentials when they first get it.
 improv_serial:
@@ -28,10 +26,9 @@ http_request:
 
 ota:
   - platform: http_request
-    id: ota_http_request
 
 update:
   - platform: http_request
     name: None
     id: update_http_request
-    source: https://esphome-altherma.jjohnsen.no/firmware/esphome-altherma.manifest.json
+    source: https://esphome-altherma.jjohnsen.no/firmware/esphome-altherma.manifest.json?board=atoms3
