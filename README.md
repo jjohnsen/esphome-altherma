@@ -117,6 +117,7 @@ switch:
 | M5Stack Stamp S3 | EHSX08P50BB | @smdx2 | [Discussion #47](https://github.com/jjohnsen/esphome-altherma/discussions/47) |
 | ESP32 | EHBH08CA3V | @papayou66 | Custom Home Assistant dashboards [Discussion #63](https://github.com/jjohnsen/esphome-altherma/discussions/63) |
 | ESP32-S3 SuperMini | ERLA16D2W17 / EBVX16S23DJ9W | @hansiputz | Custom sensor mapping, including operational findings — [Discussion #48](https://github.com/jjohnsen/esphome-altherma/discussions/48) |
+| DOIT ESP32 DevKit V1 | ETBX16E9W7 / EPRA18DW17 | @kepten | Altherma 3 H HT — [PR #49](https://github.com/jjohnsen/esphome-altherma/pull/49) |
 
 ## Installation
 

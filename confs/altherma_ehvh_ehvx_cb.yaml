@@ -619,18 +619,25 @@ binary_sensor:
     offset: 11
     convid: 307
     datasize: 1
+  # Bit is 1 while the cutout is closed (healthy). Invert so Problem means tripped.
   - <<: *binary
     name: Thermal protector BUH
+    device_class: problem
     register: 0x60
     offset: 11
     convid: 306
     datasize: 1
+    filters:
+      - invert:
   - <<: *binary
     name: Thermal protector BSH
+    device_class: problem
     register: 0x60
     offset: 11
     convid: 305
     datasize: 1
+    filters:
+      - invert:
   - <<: *binary
     name: Benefit kWh rate power supply
     register: 0x60
