@@ -113,6 +113,7 @@ switch:
 | ESP32-C6-WROOM-1 | EHBH16C9W | @AndriesMuylaert | Includes relay + onboard sensors - https://github.com/jjohnsen/esphome-altherma/discussions/11 |
 | Freenove ESP32 Dev Board Kit | EDLA09DA3V3 | @jandenouden2 | https://github.com/jjohnsen/esphome-altherma/discussions/13 |
 | ESP32-WROOM-32U DevKit | ERLQ016CAW1 (16kW Low Temp) | @ezfrag2021 | External antenna routed outside casing (Faraday cage), needs external USB power (Altherma 5V pin insufficient) - https://github.com/jjohnsen/esphome-altherma/discussions/25 |
+| ESP32 DevKit (ESP32-D0WDQ6) | ERGA04 E / EHVX04S18EJ6V | @sh4jonny | Uses `erga_eh_e_ej_04_08.yaml` |
 | ESP32-S3 DevKit | Altherma 3 R MT: ERRA08EV3/ERRA08EAV37 + ELVH12S23E6V/ELVX12S23EJ6V | @mathep34 | Bibloc R MT series, confirmed working with `erga_eh_da_04_08.yaml` — https://github.com/jjohnsen/esphome-altherma/discussions/41 |
 | M5Stack Stamp S3 | EHSX08P50BB | @smdx2 | [Discussion #47](https://github.com/jjohnsen/esphome-altherma/discussions/47) |
 | ESP32 | EHBH08CA3V | @papayou66 | Custom Home Assistant dashboards [Discussion #63](https://github.com/jjohnsen/esphome-altherma/discussions/63) |
@@ -122,6 +123,7 @@ switch:
 ## Installation
 
 > **⚠️ Note:** This repo currently includes sensor mappings for the:
+> * **ERGA E EHV/EHB/EHVZ E/EJ series (04-08kW)** — `confs/erga_eh_e_ej_04_08.yaml` (tested on EHVX04S18EJ6V + ERGA04 E)
 > * **ERGA-D EHV/EHB/EHVZ DA series (04-08kW)** (confirmed working on the bibloc **Altherma 3 R MT (ERRA + ELVH/ELVX)** series — see [discussion #41](https://github.com/jjohnsen/esphome-altherma/discussions/41))
 > * **ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O**, **Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB 11-16kW**
 > * **EPRA D/D7 with ETV16, ETB16, ETVZ16 (E/E7) 14-18kW** (including ETBX16E9W7 / EPRA18DW17).
