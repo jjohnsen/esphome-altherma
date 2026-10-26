@@ -58,6 +58,8 @@ namespace esphome
 
             void check_logger_conflict() override {}
 
+            void load_settings(bool dump_config) override {}
+
         protected:
             void generate_response(uint8_t reg_id)
             {
