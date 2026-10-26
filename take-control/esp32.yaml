@@ -1,7 +1,0 @@
-packages:
-  base: !include github://jjohnsen/esphome-altherma/take-control/base.yaml@main
-
-esp32:
-  board: esp32dev
-  framework:
-    type: esp-idf
