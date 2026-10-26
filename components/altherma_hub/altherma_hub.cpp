@@ -99,6 +99,12 @@ void AlthermaHub::loop() {
 
   switch (this->query_state_) {
     case QueryState::SEND_QUERY:
+      if (this->backoff_active_) {
+        if (millis() - this->backoff_started_at_ < ERROR_BACKOFF_MS) {
+          return;
+        }
+        this->backoff_active_ = false;
+      }
       if (this->manual_query_active_) {
         this->manual_query_pending_ = false;
         this->start_query_(this->manual_register_);
@@ -227,7 +233,7 @@ void AlthermaHub::start_query_(uint8_t regID) {
 
   this->current_register_ = regID;
   this->rx_len_ = 0;
-  this->expected_total_ = 12;  // until byte[2] (length) is known
+  this->expected_total_ = FRAME_HEADER_LEN;  // until byte[2] (length) is known
   this->query_started_at_ = millis();
 
   // Drain any stale bytes left in the RX buffer (e.g. a late response from a
@@ -254,79 +260,85 @@ void AlthermaHub::read_response_() {
   uart = mock_uart_();
 #endif
 
-  if (millis() - this->query_started_at_ > QUERY_TIMEOUT_MS) {
-    if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
-                                          "Manual query failed reg=0x%02X: timeout waiting for response",
-                                          this->current_register_);
-    } else {
-      ESP_LOGE(TAG, "Timeout waiting for response for register 0x%02x", this->current_register_);
+  // Read whatever has arrived before looking at the timeout: if loop() was
+  // delayed (Wi-Fi, API) past QUERY_TIMEOUT_MS, a reply that is already
+  // complete in the RX buffer is still used instead of being dropped.
+  while (this->rx_len_ < this->expected_total_ && uart->available() > 0) {
+    const size_t available = uart->available();
+    const size_t remaining = this->expected_total_ - this->rx_len_;
+    const size_t to_read = available < remaining ? available : remaining;
+    if (!uart->read_array(this->rx_buffer_ + this->rx_len_, to_read)) {
+      break;
     }
-    this->advance_register_();
-    return;
-  }
-
-  const size_t available = uart->available();
-  if (available == 0) {
-    return;
-  }
-
-  const size_t remaining = this->expected_total_ - this->rx_len_;
-  const size_t to_read = available < remaining ? available : remaining;
-  uint8_t byte;
-
-  if (to_read > 0 && uart->read_array(this->rx_buffer_ + this->rx_len_, to_read)) {
     this->rx_len_ += to_read;
-  } else if (uart->read_byte(&byte)) {
-    // Fallback if available() changed since sampling.
-    this->rx_buffer_[this->rx_len_++] = byte;
-  } else {
-    return;
-  }
 
-  if (this->rx_len_ >= 3) {
-    this->expected_total_ = static_cast<size_t>(this->rx_buffer_[2]) + 2;
-    if (this->expected_total_ > RX_BUFFER_SIZE) {
-      if (this->manual_query_active_) {
-        this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
-                                            "Manual query failed reg=0x%02X: invalid frame length 0x%02X",
-                                            this->current_register_, this->rx_buffer_[2]);
+    if (this->rx_len_ >= 2 && this->rx_buffer_[0] == FRAME_REFUSED_0) {
+      if (this->rx_buffer_[1] == FRAME_REFUSED_1) {
+        // The unit answers 15 EA for a register it does not support.
+        this->fail_query_("register not supported (15 EA)");
       } else {
-        ESP_LOGE(TAG, "Invalid frame length 0x%02x for register 0x%02x", this->rx_buffer_[2], this->current_register_);
+        this->fail_query_("invalid response start 0x%02X 0x%02X", this->rx_buffer_[0], this->rx_buffer_[1]);
       }
-      this->advance_register_();
       return;
     }
+    if (this->rx_buffer_[0] != FRAME_START && this->rx_buffer_[0] != FRAME_REFUSED_0) {
+      this->fail_query_("invalid response start byte 0x%02X", this->rx_buffer_[0]);
+      return;
+    }
+
+    if (this->rx_len_ == FRAME_HEADER_LEN && this->expected_total_ == FRAME_HEADER_LEN) {
+      // byte[2] counts everything after itself except the CRC, so the whole
+      // frame is byte[2] + 2. Read exactly that many bytes, never more.
+      const size_t total = static_cast<size_t>(this->rx_buffer_[2]) + 2;
+      if (total < FRAME_HEADER_LEN + 1 || total > RX_BUFFER_SIZE) {
+        this->fail_query_("invalid frame length 0x%02X", this->rx_buffer_[2]);
+        return;
+      }
+      this->expected_total_ = total;
+    }
   }
 
-  if (this->rx_len_ >= this->expected_total_) {
+  if (this->rx_len_ >= FRAME_HEADER_LEN && this->rx_len_ == this->expected_total_) {
     this->handle_complete_frame_();
+    return;
   }
+
+  if (millis() - this->query_started_at_ > QUERY_TIMEOUT_MS) {
+    this->fail_query_("timeout waiting for response (%u of %u bytes)", (unsigned) this->rx_len_,
+                      (unsigned) this->expected_total_);
+  }
+}
+
+void AlthermaHub::fail_query_(const char *fmt, ...) {
+  char reason[96];
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(reason, sizeof(reason), fmt, args);
+  va_end(args);
+
+  if (this->manual_query_active_) {
+    this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR, "Manual query failed reg=0x%02X: %s",
+                                        this->current_register_, reason);
+  } else {
+    ESP_LOGE(TAG, "Register 0x%02x: %s", this->current_register_, reason);
+  }
+
+  // Give the unit a pause before the next request, as ESPAltherma does after
+  // a failed read; any late bytes are drained by start_query_().
+  this->backoff_active_ = true;
+  this->backoff_started_at_ = millis();
+  this->advance_register_();
 }
 
 void AlthermaHub::handle_complete_frame_() {
   unsigned char crc = calculate_crc(this->rx_buffer_, this->rx_len_ - 1);
   if (crc != this->rx_buffer_[this->rx_len_ - 1]) {
-    if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
-                                          "Manual query failed reg=0x%02X: CRC invalid 0x%02X (expected 0x%02X)",
-                                          this->current_register_, this->rx_buffer_[this->rx_len_ - 1], crc);
-    } else {
-      ESP_LOGE(TAG, "CRC Invalid: 0x%02x (expected 0x%02x)", this->rx_buffer_[this->rx_len_ - 1], crc);
-    }
-    this->advance_register_();
+    this->fail_query_("CRC invalid 0x%02X (expected 0x%02X)", this->rx_buffer_[this->rx_len_ - 1], crc);
     return;
   }
 
   if (this->rx_buffer_[1] != this->current_register_) {
-    if (this->manual_query_active_) {
-      this->publish_manual_query_statusf_(ESPHOME_LOG_LEVEL_ERROR,
-                                          "Manual query failed reg=0x%02X: response for 0x%02X",
-                                          this->current_register_, this->rx_buffer_[1]);
-    } else {
-      ESP_LOGE(TAG, "Invalid register response: 0x%02x - asked for 0x%02x", this->rx_buffer_[1], this->current_register_);
-    }
-    this->advance_register_();
+    this->fail_query_("response for register 0x%02X", this->rx_buffer_[1]);
     return;
   }
 
