@@ -181,6 +181,7 @@ Model files define the available sensors for specific Altherma units. Each senso
 - `erla_d_ebsh_11_16_ech2o.yaml` - EBSXB16P50DF / ERLA D EBSH-X 16P30-50 D series 11-16kW-ECH2O
 - `altherma_ehvh_ehvx_cb.yaml` - Daikin Altherma LT CA/CB EHVH-CB / EHVX-CB (11-16kW)
 - `epra_d_etv_etb_etvz_14_18.yaml` - EPRA D/D7 with ETV16, ETB16 (including wall-mounted ETBX), ETVZ16 E/E7 series (14-18kW). Mapped for ETBX16E9W7 / EPRA18DW17
+- `geo3_egsah_ewsah_d_06_10.yaml` - **Experimental** GEO3 EGSAH-X / EWSAH-X D series (6-10 kW), including EGSAH06. Derived from D-Checker GSHP2; brine inlet/outlet sensors included but not yet verified on hardware. Select with `altherma_model: geo3_egsah_ewsah_d_06_10` in `base.yaml`.
 
 ### Packages In `base.yaml`
 
