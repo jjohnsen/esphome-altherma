@@ -8,6 +8,7 @@ substitutions:
   # altherma_ehvh_ehvx_cb      - EHVH/EHVX CB
   # epra_d_etv_etb_etvz_14_18  - EPRA D / ETV/ETB/ETVZ
   # erla_d_ebv_ebb_ebvz_11_16  - ERLA D / EBV/EBB/EBVZ
+  # geo3_egsah_ewsah_d_06_10  - GEO3 EGSAH/EWSAH D (6-10 kW, experimental)
   altherma_model: erga_eh_da_04_08
 
   # Default to GitHub for Take Control.
