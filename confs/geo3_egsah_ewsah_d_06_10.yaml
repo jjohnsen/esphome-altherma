@@ -1,0 +1,322 @@
+# Daikin Altherma GEO3: EGSAH-X / EWSAH-X D-series, 6-10 kW (including EGSAH06).
+# EXPERIMENTAL: derived from D-Checker 3 V3807 Altherma(GSHP2).ldd.
+# Cross-checked with ESPAltherma's GEO3 definition:
+# https://github.com/raomin/ESPAltherma/blob/main/include/def/Altherma(EGSAH-X-EWSAH-X-D%20series%206-10kW%20GEO3).h
+# Registers and readings still need verification on actual GEO3 hardware.
+# Use INSTEAD OF (not alongside) other confs/*.yaml model profiles.
+# Brine inlet R5T = 0x20 offset 8; brine outlet R6T = 0x20 offset 10.
+# Read-only sensor configuration. No heat pump control actions are included.
+
+.altherma_base: &altherma_base
+  platform: altherma_hub
+  altherma_hub_id: altherma_hub_1
+
+.number: &number
+  <<: *altherma_base
+  state_class: measurement
+
+.binary: &binary
+  <<: *altherma_base
+
+.text: &text
+  <<: *altherma_base
+
+sensor:
+  - <<: *number
+    name: Outdoor air temp.(R1T)
+    register: 0x20
+    offset: 0
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: 2 phase thermistor (R4T)
+    register: 0x20
+    offset: 2
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Discharge pipe temp.
+    register: 0x20
+    offset: 4
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Suction pipe temp.(R3T)
+    register: 0x20
+    offset: 6
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Entering brine temp.(R5T)
+    register: 0x20
+    offset: 8
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Leaving brine temp.(R6T)
+    register: 0x20
+    offset: 10
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: High Pressure
+    register: 0x20
+    offset: 12
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "bar"
+    device_class: pressure
+    accuracy_decimals: 1
+  - <<: *number
+    name: Low Pressure
+    register: 0x20
+    offset: 14
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "bar"
+    device_class: pressure
+    accuracy_decimals: 1
+  - <<: *number
+    name: INV primary current (A)
+    register: 0x21
+    offset: 0
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "A"
+    device_class: current
+  - <<: *number
+    name: INV fin temp.
+    register: 0x21
+    offset: 4
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: INV frequency (rps)
+    register: 0x30
+    offset: 0
+    convid: 152
+    datasize: 1
+    unit_of_measurement: "rps"
+  - <<: *number
+    name: Brine pump feedback
+    register: 0x30
+    offset: 1
+    convid: 211
+    datasize: 1
+    accuracy_decimals: 0
+  - <<: *number
+    name: DHW setpoint
+    register: 0x60
+    offset: 7
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: LW setpoint (main)
+    register: 0x60
+    offset: 9
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Leaving water temp. before BUH (R1T)
+    register: 0x61
+    offset: 2
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Leaving water temp. after BUH (R2T)
+    register: 0x61
+    offset: 4
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Refrig. Temp. liquid side (R3T)
+    register: 0x61
+    offset: 6
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Inlet water temp.(R4T)
+    register: 0x61
+    offset: 8
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: DHW tank temp. (R5T)
+    register: 0x61
+    offset: 10
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Indoor ambient temp. (R1T)
+    register: 0x61
+    offset: 12
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+  - <<: *number
+    name: Flow sensor (l/min)
+    register: 0x62
+    offset: 9
+    convid: 105
+    datasize: 2
+    unit_of_measurement: "l/min"
+  - <<: *number
+    name: Water pressure
+    register: 0x62
+    offset: 11
+    convid: 105
+    datasize: 1
+    unit_of_measurement: "bar"
+    device_class: pressure
+    accuracy_decimals: 1
+  - <<: *number
+    name: Water pump signal (0:max-100:stop)
+    register: 0x62
+    offset: 12
+    convid: 152
+    datasize: 1
+    accuracy_decimals: 0
+
+binary_sensor:
+  - <<: *binary
+    name: Outdoor Thermostat ON/OFF
+    register: 0x10
+    offset: 1
+    convid: 307
+    datasize: 1
+  - <<: *binary
+    name: Indoor Thermostat ON/OFF
+    register: 0x60
+    offset: 2
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Freeze Protection
+    register: 0x60
+    offset: 2
+    convid: 302
+    datasize: 1
+  - <<: *binary
+    name: Silent Mode
+    register: 0x60
+    offset: 2
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: 3way valve(On:DHW_Off:Space)
+    register: 0x60
+    offset: 12
+    convid: 306
+    datasize: 1
+  - <<: *binary
+    name: BUH Step1
+    register: 0x60
+    offset: 12
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: BUH Step2
+    register: 0x60
+    offset: 12
+    convid: 303
+    datasize: 1
+  - <<: *binary
+    name: Water pump operation
+    register: 0x60
+    offset: 12
+    convid: 301
+    datasize: 1
+  - <<: *binary
+    name: Powerful DHW Operation. ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 304
+    datasize: 1
+  - <<: *binary
+    name: Space heating Operation ON/OFF
+    register: 0x62
+    offset: 2
+    convid: 303
+    datasize: 1
+
+text_sensor:
+  - <<: *text
+    name: Operation Mode
+    register: 0x10
+    offset: 0
+    convid: 217
+    datasize: 1
+  - <<: *text
+    name: Outdoor Error type
+    register: 0x10
+    offset: 4
+    convid: 203
+    datasize: 1
+  - <<: *text
+    name: Outdoor Error Code
+    register: 0x10
+    offset: 5
+    convid: 204
+    datasize: 1
+  - <<: *text
+    name: I/U operation mode
+    register: 0x60
+    offset: 2
+    convid: 315
+    datasize: 1
+  - <<: *text
+    name: Indoor Error Code
+    register: 0x60
+    offset: 3
+    convid: 204
+    datasize: 1
+  - <<: *text
+    name: Indoor Error type
+    register: 0x60
+    offset: 5
+    convid: 203
+    datasize: 1
