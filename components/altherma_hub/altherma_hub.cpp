@@ -22,6 +22,7 @@ LabelDef labelDefs[] = {};
       ESP_LOGV(CONV_TAG, fmt, args...);
     }
   };
+  #undef Serial            // locally disable default arduino macro "#define Serial Serial0" to avoid conflict with ESP32-S3
   static FakeSerial Serial;
 
 //}
